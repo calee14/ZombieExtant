@@ -9,37 +9,44 @@
 import SpriteKit
 import GameplayKit
 
+//TODO: Add ammo
+//TODO: Add collectables
+//TODO: tweak difficulty
+//TODO: change the difficulty for wave 2, 3
+//
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
     //Connect Game Objects
+    //Guns
     var topGun: TopGun!
     var leftGun: TopGun!
     var rightGun: TopGun!
-    
     //Layers
     var bulletLayer: SKNode!
     var turretLayer: SKNode!
     var zombieLayer: SKNode!
-    
     //Spawners
     var topSpawn: SKSpriteNode!
     var rightSpawn: SKSpriteNode!
     var leftSpawn: SKSpriteNode!
     var bottomSpawn: SKSpriteNode!
-    
+    //UI objects
+    var ammoLabel: SKLabelNode!
+    var waveLabel: SKLabelNode!
     //Initialize vriables
     var fixedDelta: CFTimeInterval = 1.0/60.0 // 60 FPS
     var toBeDeleted: [SKSpriteNode] = [SKSpriteNode]()
     var contactTimer: CFTimeInterval = 0
     var spawnTimer: CFTimeInterval = 0
     var stagerTimer: UInt32 = 6
-    var waveNum = 1
+    var waveNum = 5
     var zombieCount = 0
     var zombieSpawned = 0
     var zombiesAddedEveryWave = 24
     var zombieOnGroundCount = 0
     var waveBegan = false
     var filterZombiesPerWave = 24
+    var ammo: Int = 0
     
     override func didMove(to view: SKView) {
         //Set up scene here
@@ -62,6 +69,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         leftGun = self.childNode(withName: "//leftGun") as! TopGun
         rightGun = self.childNode(withName: "//rightGun") as! TopGun
         
+        //Connect the UI objects
+        waveLabel = self.childNode(withName: "waveLabel") as! SKLabelNode
+        waveLabel.text = "Wave: \(waveNum)"
+        
+        //Connect the turrets to the gameScene
         for turret in turretLayer.children as! [TopGun] {
             turret.gameScene = self
         }
@@ -197,7 +209,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             if waveNum >= 5 {
                 //96 is four 24 * num of spawners which is 4
                 //4 is for every level after 5
-                zombieCount = (waveNum - 4) * 96
+                //The mulitplier will need to be divisible by 4 and the result must be the filterZombiePerWave
+                zombieCount = (waveNum - 4) * filterZombiesPerWave * 4 // 94
             } else if waveNum < 5 {
                 zombieCount = waveNum * zombiesAddedEveryWave
             }
@@ -208,7 +221,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if waveNum >= 5 {
             //96 is four 24 * num of spawners which is 4
             //4 is for every level after 5
-            totalNumOfZom = (waveNum - 4) * 96
+            //The mulitplier will need to be divisible by 4 and the result must be the filterZombiePerWave
+            totalNumOfZom = (waveNum - 4) * filterZombiesPerWave * 4 // * 94
         } else if waveNum < 5 {
             totalNumOfZom = waveNum * zombiesAddedEveryWave
         }
@@ -225,13 +239,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             //if we killed all the zombies start a new wave
             //make a new wave
             //Update the zombie spawned
-            
             //let wait = SKAction.wait(forDuration: 5)
             zombieSpawned = 0
             zombieOnGroundCount = 0
             waveBegan = false
             //Start a new wave
             waveNum += 1
+            waveLabel.text = "Wave: \(waveNum)"
             spawnWave(wave: waveNum)
             print("wave count = \(waveNum)")
         }
@@ -243,7 +257,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if wave >= 5 {
             //96 is four 24 * num of spawners which is 4
             //4 is for every level after 5
-            zombiesPerWave = (wave - 4) * 96
+            //The mulitplier will need to be divisible by 4 and the result must be the filterZombiePerWave
+            zombiesPerWave = (wave - 4) * filterZombiesPerWave * 4 // * 94
         } else if wave < 5 {
             zombiesPerWave = 24
         }
@@ -257,18 +272,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         zombieSpawned += zombiesPerSpawner * 4
         zombieOnGroundCount += zombiesPerSpawner * 4
         
-        //if spawnTimer > 1 {
-            //Top spawn
-            addZombies(count: zombiesPerSpawner, spawner: topSpawn)
-            //Right spawn
-            addZombies(count: zombiesPerSpawner, spawner: rightSpawn)
-            //Left spawn
-            addZombies(count: zombiesPerSpawner, spawner: leftSpawn)
-            //Bottom spawn
-            addZombies(count: zombiesPerSpawner, spawner: bottomSpawn)
-            //spawnTimer = 0
-        //}
-        
+        //Top spawn
+        addZombies(count: zombiesPerSpawner, spawner: topSpawn)
+        //Right spawn
+        addZombies(count: zombiesPerSpawner, spawner: rightSpawn)
+        //Left spawn
+        addZombies(count: zombiesPerSpawner, spawner: leftSpawn)
+        //Bottom spawn
+        addZombies(count: zombiesPerSpawner, spawner: bottomSpawn)
         
     }
     
