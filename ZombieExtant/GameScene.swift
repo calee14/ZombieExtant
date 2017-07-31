@@ -33,20 +33,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     //UI objects
     var ammoLabel: SKLabelNode!
     var waveLabel: SKLabelNode!
-    //Initialize vriables
+    //Initialize variables
     var fixedDelta: CFTimeInterval = 1.0/60.0 // 60 FPS
     var toBeDeleted: [SKSpriteNode] = [SKSpriteNode]()
     var contactTimer: CFTimeInterval = 0
     var spawnTimer: CFTimeInterval = 0
     var stagerTimer: UInt32 = 6
-    var waveNum = 5
+    var waveNum = 1
     var zombieCount = 0
     var zombieSpawned = 0
-    var zombiesAddedEveryWave = 24
     var zombieOnGroundCount = 0
     var waveBegan = false
     var filterZombiesPerWave = 24
-    var ammo: Int = 0
+    var zombiesInTheWave = 0
     
     override func didMove(to view: SKView) {
         //Set up scene here
@@ -145,12 +144,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 let bullet = nodeB as! Bullet
                 //To prevent multiple collisions
                 if bullet.bulletHit != false { return }
-                toBeDeleted.append(nodeA as! SKSpriteNode)
+                
+                //Check the zombie if it has no more health
+                let zombie = nodeA as! Zombie
+                if zombie.health == 1 {
+                    //zombie.deathAnimation()
+                    toBeDeleted.append(nodeA as! SKSpriteNode)
+                    
+                    //Update zombie count
+                    zombieCount -= 1
+                    zombieOnGroundCount -= 1
+                } else {
+                    zombie.health -= 1
+                }
                 toBeDeleted.append(nodeB as! Bullet)
                 
-                //Update zombie count
-                zombieCount -= 1
-                zombieOnGroundCount -= 1
                 //Disable the bullet
                 bullet.bulletHit = true
                 return
@@ -158,12 +166,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 let bullet = nodeA as! Bullet
                 //To prevent multiple collisions
                 if bullet.bulletHit != false { return }
-                toBeDeleted.append(nodeB as! SKSpriteNode)
+                
+                //Check the zombie if it has no more health
+                let zombie = nodeB as! Zombie
+                if zombie.health == 1 {
+                    //zombie.deathAnimation()
+                    toBeDeleted.append(nodeB as! SKSpriteNode)
+                    
+                    //Update zombie count
+                    zombieCount -= 1
+                    zombieOnGroundCount -= 1
+                } else {
+                    zombie.health -= 1
+                }
                 toBeDeleted.append(nodeA as! Bullet)
                 
-                //Update zombie count
-                zombieCount -= 1
-                zombieOnGroundCount -= 1
                 //Disable the bullet
                 bullet.bulletHit = true
                 return
@@ -204,30 +221,32 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func waveManager() {
         if waveBegan == false {
+            
             //Gets the value of the num of zombies in the wave
-            zombieCount = waveNum * zombiesAddedEveryWave
-            if waveNum >= 5 {
+            //Important for spawning the entire wave
+            zombieCount = waveNum * filterZombiesPerWave
+            
+            //Wave spawning editor
+            if waveNum < 5 {
+                //Number of spawns editor
+                zombieCount = waveNum * filterZombiesPerWave
+                zombiesInTheWave = waveNum * filterZombiesPerWave
+            } else if waveNum >= 5 {
+                if filterZombiesPerWave >= 28 {
+                    filterZombiesPerWave = 28
+                } else {
+                    filterZombiesPerWave += 2
+                }
                 //96 is four 24 * num of spawners which is 4
                 //4 is for every level after 5
                 //The mulitplier will need to be divisible by 4 and the result must be the filterZombiePerWave
-                zombieCount = (waveNum - 4) * filterZombiesPerWave * 4 // 94
-            } else if waveNum < 5 {
-                zombieCount = waveNum * zombiesAddedEveryWave
+                zombieCount = (waveNum - 4) * filterZombiesPerWave * 4 // 96
+                zombiesInTheWave = (waveNum - 4) * filterZombiesPerWave * 4 // 96
             }
             waveBegan = true
         }
         
-        var totalNumOfZom = 0 //waveNum * zombiesAddedEveryWave
-        if waveNum >= 5 {
-            //96 is four 24 * num of spawners which is 4
-            //4 is for every level after 5
-            //The mulitplier will need to be divisible by 4 and the result must be the filterZombiePerWave
-            totalNumOfZom = (waveNum - 4) * filterZombiesPerWave * 4 // * 94
-        } else if waveNum < 5 {
-            totalNumOfZom = waveNum * zombiesAddedEveryWave
-        }
-        
-        if zombieSpawned < totalNumOfZom {
+        if zombieSpawned < zombiesInTheWave {
             print("zombies \(zombieSpawned) count \(zombieOnGroundCount)")
             //Run code to add more zombies
             //Check if it is the right time to spawn zombies
@@ -235,7 +254,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 spawnWave(wave: waveNum)
             }
 
-        } else if zombieCount <= 0 {
+        } else if zombieCount <= 0 && zombieLayer.children.count == 0 {
             //if we killed all the zombies start a new wave
             //make a new wave
             //Update the zombie spawned
@@ -253,17 +272,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func spawnWave(wave: Int) {
         //Get the total num zombies for the wave
-        var zombiesPerWave = 0
-        if wave >= 5 {
-            //96 is four 24 * num of spawners which is 4
-            //4 is for every level after 5
-            //The mulitplier will need to be divisible by 4 and the result must be the filterZombiePerWave
-            zombiesPerWave = (wave - 4) * filterZombiesPerWave * 4 // * 94
-        } else if wave < 5 {
-            zombiesPerWave = 24
+        
+        var zombiesPerSpawner = Int(zombiesInTheWave / 4)
+        if wave < 6 {
+            zombiesPerSpawner = 24 / 4
         }
-         //+ zombieLayer.children.count
-        var zombiesPerSpawner = Int(zombiesPerWave / 4)
         //Filter the num of zombies per spawner
         if zombiesPerSpawner > filterZombiesPerWave {
             zombiesPerSpawner = filterZombiesPerWave
@@ -316,7 +329,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             //Add a zombie to the scene
             let newZombie = Zombie()
             newZombie.gameScene = self
-            newZombie.spd = 20.0 //Double(arc4random_uniform(4)) + 20.0
+            
+            //Level editor
+            
+            if waveNum == 2 {
+                //let rand = arc4random_uniform(100)
+                newZombie.zombieType = .fast
+            } else if waveNum == 3 {
+                //Big zombies
+                newZombie.zombieType = .big
+            } else {
+                newZombie.spd = 20.0 //Double(arc4random_uniform(4)) + 20.0
+            }
+            
+            newZombie.setZombieType()
+            
+            //End of Level editor
             newZombie.position = randPosition
             //Make the zombie move
             newZombie.moveToClosestTurret()
