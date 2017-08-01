@@ -39,7 +39,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var contactTimer: CFTimeInterval = 0
     var spawnTimer: CFTimeInterval = 0
     var stagerTimer: UInt32 = 6
-    var waveNum = 1
+    //Wave Controller
+    var waveNum = 8
     var zombieCount = 0
     var zombieSpawned = 0
     var zombieOnGroundCount = 0
@@ -119,10 +120,29 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func didBegin(_ contact: SKPhysicsContact) {
         let contactA: SKPhysicsBody = contact.bodyA
+        print("contactA = \(contactA)")
         let contactB: SKPhysicsBody = contact.bodyB
+        print("contactB = \(contactB)")
         
-        let nodeA = contactA.node!
-        let nodeB = contactB.node!
+        //Does a check for node A if it is dead
+        let contactNodeA = contactA.node
+        var nodeA: SKNode!
+        if contactNodeA != nil {
+            nodeA = contactNodeA
+            print("nodeA = \(nodeA)")
+        } else {
+            return
+        }
+        
+        //Does a check for node B if it is dead
+        let contactNodeB = contactB.node
+        var nodeB: SKNode!
+        if contactNodeB != nil {
+            nodeB = contactNodeB
+            print("nodeB = \(nodeB)")
+        } else {
+            return
+        }
         
         if nodeA.name == "zombie" || nodeB.name == "zombie" {
             if nodeA.name == "zombie" && nodeB.name == "zombie" { return }
@@ -133,13 +153,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 nodeA.removeAllActions()
                 let zombie = nodeA as! Zombie
                 zombie.attack()
+                return
             } else if nodeB.name == "zombie" && nodeA.physicsBody?.contactTestBitMask == 3 {
                 nodeB.removeAllActions()
                 let zombie = nodeB as! Zombie
                 zombie.attack()
+                return
             }
             
-            //If the bullet collides with the bullet
+            //If the bullet collides with the zombie
             if nodeA.name == "zombie" && nodeB.name == "bullet" {
                 let bullet = nodeB as! Bullet
                 //To prevent multiple collisions
@@ -148,14 +170,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 //Check the zombie if it has no more health
                 let zombie = nodeA as! Zombie
                 if zombie.health == 1 {
-                    //zombie.deathAnimation()
-                    toBeDeleted.append(nodeA as! SKSpriteNode)
+                    //removePhysicsBody.append(zombie)
+                    zombie.deathAnimation()
+                    //toBeDeleted.append(nodeA as! SKSpriteNode)
                     
                     //Update zombie count
                     zombieCount -= 1
                     zombieOnGroundCount -= 1
                 } else {
                     zombie.health -= 1
+                    zombie.takeHitAnimation()
                 }
                 toBeDeleted.append(nodeB as! Bullet)
                 
@@ -170,14 +194,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 //Check the zombie if it has no more health
                 let zombie = nodeB as! Zombie
                 if zombie.health == 1 {
-                    //zombie.deathAnimation()
-                    toBeDeleted.append(nodeB as! SKSpriteNode)
+                    //removePhysicsBody.append(zombie)
+                    zombie.deathAnimation()
+                    //toBeDeleted.append(nodeB as! SKSpriteNode)
                     
                     //Update zombie count
                     zombieCount -= 1
                     zombieOnGroundCount -= 1
                 } else {
                     zombie.health -= 1
+                    zombie.takeHitAnimation()
                 }
                 toBeDeleted.append(nodeA as! Bullet)
                 
@@ -231,6 +257,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     filterZombiesPerWave += 2
                 }
             }
+            
             //Wave spawning editor
             if waveNum < 5 {
                 //Number of spawns editor
@@ -245,6 +272,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
             waveBegan = true
         }
+        
+        if waveBegan == false { return }
         
         if zombieSpawned < zombiesInTheWave {
             print("zombies \(zombieSpawned) count \(zombieOnGroundCount)")

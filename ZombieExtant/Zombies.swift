@@ -13,6 +13,10 @@ enum ZombieType {
     case fast, normal, big
 }
 
+enum ZombieActions {
+    case idle, walk, attack, death
+}
+
 class Zombie: SKSpriteNode {
     
     weak var gameScene: GameScene!
@@ -20,46 +24,57 @@ class Zombie: SKSpriteNode {
     weak var target: TopGun!
     var zombieType: ZombieType = .normal
     var health = 1
+    var zombieAction: ZombieActions = .idle
     
     func moveToClosestTurret() {
         print("we are moving")
-        //Animate the zombie for the specific action
-        self.animateZombie()
-        //Creating an array to store our data
-        var arrayDist: [(turret: Int, dist: CGFloat)] = []
         
-        //TODO: fix for loop
-        for turret in 1...gameScene.turretLayer.children.count {
-            //If the turret is the same one we could skip it
-            if target != nil {
-                let thing = gameScene.turretLayer.children[turret - 1] as! TopGun
-                if thing.name! == target.name { continue }
+        if self.zombieAction == .death { return }
+        
+        //Animate the zombie for the specific action
+        //Keep track of what the zombie is doing
+        self.zombieAction = .walk
+        self.animateZombie()
+        
+        if target == nil {
+            //Creating an array to store our data
+            var arrayDist: [(turret: Int, dist: CGFloat)] = []
+        
+            //TODO: fix for loop
+            for turret in 1...gameScene.turretLayer.children.count {
+                //If the turret is the same one we could skip it
+                if target != nil {
+                    let thing = gameScene.turretLayer.children[turret - 1] as! TopGun
+                    if thing.name! == target.name { continue }
+                }
+                let num = turret - 1
+                //Gets the distance of all the turrets from the tap
+                let distance: CGFloat = gameScene.distanceTo(self.position, gameScene.turretLayer.children[num].position)
+                arrayDist.append((turret: num, dist: distance))
             }
-            let num = turret - 1
-            //Gets the distance of all the turrets from the tap
-            let distance: CGFloat = gameScene.distanceTo(self.position, gameScene.turretLayer.children[num].position)
-            arrayDist.append((turret: num, dist: distance))
-        }
-        //Looks for the turret with the less distance to the tap
-        var minimum = 0
-        for item in arrayDist {
-            //Takes an item from the array
-            var count = 0
-            for dist in arrayDist {
-                //Compares it with the others
-                if item.dist < dist.dist {
-                    //Updates the count
-                    count += 1
+            //Looks for the turret with the less distance to the tap
+            var minimum = 0
+            for item in arrayDist {
+                //Takes an item from the array
+                var count = 0
+                for dist in arrayDist {
+                    //Compares it with the others
+                    if item.dist < dist.dist {
+                        //Updates the count
+                        count += 1
+                    }
+                }
+                //if the item is greater than the others use it
+                if count == arrayDist.count - 1 {
+                    print("found it")
+                    minimum = item.turret
                 }
             }
-            //if the item is greater than the others use it
-            if count == arrayDist.count - 1 {
-                print("found it")
-                minimum = item.turret
-            }
+            target = gameScene.turretLayer.children[minimum] as! TopGun
         }
-        target = gameScene.turretLayer.children[minimum] as! TopGun
-        self.run(SKAction.move(to: gameScene.turretLayer.children[minimum].position, duration: spd),
+        
+        //Move our zombie to the target
+        self.run(SKAction.move(to: target.position, duration: spd),
                 //After action is done, just call the completion-handler.
             completion: { [unowned self] in
                 //If there are no more zombies we can stop the zombie
@@ -67,18 +82,65 @@ class Zombie: SKSpriteNode {
                     self.removeAllActions()
                     return
                 }
+                self.target = nil
                 self.moveToClosestTurret()
         })
     }
     
+    func takeHitAnimation() {
+        
+        if self.zombieAction == .death { return }
+        
+        self.removeAllActions()
+        
+        //Animation scaling for the walking zombie
+        if self.position.x < gameScene.size.width / 2 {
+            self.xScale = xScale
+        } else if self.position.x < gameScene.size.width / 2 {
+            self.xScale = xScale
+        }
+        //let rand = Int(arc4random_uniform(4)) + 1
+        let rand = 1
+        let imageName = "zombie"
+        var imageArray: [SKTexture] = [SKTexture]()
+        
+        //Images 1 - 3 are falling for zombies
+        for i in 1...3 {
+            imageArray.append(SKTexture(imageNamed: "\(imageName)\(rand)000\(i)"))
+        }
+        let animate = SKAction.animate(with: imageArray, timePerFrame: 0.2) //0.2
+        let wait = SKAction.wait(forDuration: spd * 0.01 * Double(imageArray.count))
+        let resumeActions = SKAction.run({ [unowned self] in
+            //Animation scaling for the walking zombie
+            if self.position.x < self.gameScene.size.width / 2 {
+                self.xScale = -self.xScale
+            } else if self.position.x < self.gameScene.size.width / 2 {
+                self.xScale = self.xScale
+            }
+            if self.zombieAction == .attack {
+                self.attack()
+            } else if self.zombieAction == .walk {
+                self.moveToClosestTurret()
+            }
+        })
+        let seq = SKAction.sequence([animate, wait, resumeActions])
+        self.run(seq)
+    }
+    
     func deathAnimation() {
+        
+        if zombieAction == .death { return }
+        
+        //Keep track of what the zombie is doing
+        zombieAction = .death
+        
         //Animate death scene
         self.removeAllActions()
         self.physicsBody = nil
         
         //Animation for the walking zombie
         if self.position.x < gameScene.size.width / 2 {
-            self.xScale *= -1
+            self.xScale = xScale
         } else if self.position.x < gameScene.size.width / 2 {
             self.xScale = xScale
         }
@@ -95,6 +157,7 @@ class Zombie: SKSpriteNode {
         let animate = SKAction.animate(with: imageArray, timePerFrame: spd * 0.01) //0.2
         let wait = SKAction.wait(forDuration: spd * 0.01 * Double(imageArray.count))
         let remove = SKAction.run({ [unowned self] in
+            //self.gameScene.toBeDeleted.append(self)
             self.removeFromParent()
         })
         let seq = SKAction.sequence([animate, wait, remove])
@@ -103,8 +166,14 @@ class Zombie: SKSpriteNode {
     
     func attack() {
         
+        if self.zombieAction == .death { return }
+        
         //Animate the zombie for the specific action
         self.attackZombie()
+        
+        //Keep track of the zombie actions
+        zombieAction = .attack
+        
         //Attack the turret
         let wait = SKAction.wait(forDuration: spd * 0.01 * 6.0) //0.2 * num of animates in array
         let attack = SKAction.run({ [unowned self] in
@@ -118,6 +187,7 @@ class Zombie: SKSpriteNode {
             //if our target health is zero move on to the next one
             if self.target.health <= 0 {
                 print("we lost our target")
+                self.target = nil
                 self.removeAction(forKey: "attack")
                 self.moveToClosestTurret()
             }
@@ -131,10 +201,12 @@ class Zombie: SKSpriteNode {
     
     func attackZombie() {
         
+        if self.zombieAction == .death { return }
+        
         //Animaiton for the attacking zombie
         self.removeAction(forKey: "walk")
         if self.position.x < gameScene.size.width / 2 {
-            self.xScale *= -1
+            self.xScale = self.xScale
         } else if self.position.x < gameScene.size.width / 2 {
             self.xScale = self.xScale
         }
@@ -151,6 +223,8 @@ class Zombie: SKSpriteNode {
     }
     
     func animateZombie() {
+        
+        if self.zombieAction == .death { return }
         
         self.removeAllActions()
         //Animation for the walking zombie
@@ -191,6 +265,12 @@ class Zombie: SKSpriteNode {
     }
     
     func setZombieType() {
+        //Animation for the walking zombie
+        if self.position.x < gameScene.size.width / 2 {
+            self.xScale *= -1
+        } else if self.position.x < gameScene.size.width / 2 {
+            self.xScale = xScale
+        }
         switch zombieType {
         case .fast:
             //size of the fast zombie
