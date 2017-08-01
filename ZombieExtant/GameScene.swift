@@ -192,7 +192,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
         print("zombie count = \(zombieCount)")
-        
         //Manages the waves
         waveManager()
         
@@ -225,18 +224,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             //Gets the value of the num of zombies in the wave
             //Important for spawning the entire wave
             zombieCount = waveNum * filterZombiesPerWave
-            
+            if waveNum >= 5 {
+                if filterZombiesPerWave >= 28 {
+                    filterZombiesPerWave = 28
+                } else {
+                    filterZombiesPerWave += 2
+                }
+            }
             //Wave spawning editor
             if waveNum < 5 {
                 //Number of spawns editor
                 zombieCount = waveNum * filterZombiesPerWave
                 zombiesInTheWave = waveNum * filterZombiesPerWave
             } else if waveNum >= 5 {
-                if filterZombiesPerWave >= 28 {
-                    filterZombiesPerWave = 28
-                } else {
-                    filterZombiesPerWave += 2
-                }
                 //96 is four 24 * num of spawners which is 4
                 //4 is for every level after 5
                 //The mulitplier will need to be divisible by 4 and the result must be the filterZombiePerWave

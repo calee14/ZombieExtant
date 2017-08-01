@@ -80,7 +80,7 @@ class Zombie: SKSpriteNode {
         if self.position.x < gameScene.size.width / 2 {
             self.xScale *= -1
         } else if self.position.x < gameScene.size.width / 2 {
-            self.xScale = 0.13
+            self.xScale = xScale
         }
         //let rand = Int(arc4random_uniform(4)) + 1
         let rand = 1
@@ -136,7 +136,7 @@ class Zombie: SKSpriteNode {
         if self.position.x < gameScene.size.width / 2 {
             self.xScale *= -1
         } else if self.position.x < gameScene.size.width / 2 {
-            self.xScale = 0.13
+            self.xScale = self.xScale
         }
         //let rand = Int(arc4random_uniform(4)) + 1
         let rand = 1
@@ -157,7 +157,7 @@ class Zombie: SKSpriteNode {
         if self.position.x < gameScene.size.width / 2 {
             self.xScale *= -1
         } else if self.position.x < gameScene.size.width / 2 {
-            self.xScale = 0.13
+            self.xScale = self.xScale
         }
         //let rand = Int(arc4random_uniform(4)) + 1
         let rand = 1
