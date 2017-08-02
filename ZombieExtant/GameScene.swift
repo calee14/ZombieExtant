@@ -40,7 +40,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var spawnTimer: CFTimeInterval = 0
     var stagerTimer: UInt32 = 6
     //Wave Controller
-    var waveNum = 8
+    var waveNum = 1
     var zombieCount = 0
     var zombieSpawned = 0
     var zombieOnGroundCount = 0

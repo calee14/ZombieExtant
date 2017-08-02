@@ -25,6 +25,7 @@ class Zombie: SKSpriteNode {
     var zombieType: ZombieType = .normal
     var health = 1
     var zombieAction: ZombieActions = .idle
+    var zombieImage = 1
     
     func moveToClosestTurret() {
         print("we are moving")
@@ -106,7 +107,7 @@ class Zombie: SKSpriteNode {
         
         //Images 1 - 3 are falling for zombies
         for i in 1...3 {
-            imageArray.append(SKTexture(imageNamed: "\(imageName)\(rand)000\(i)"))
+            imageArray.append(SKTexture(imageNamed: "\(imageName)\(zombieImage)000\(i)"))
         }
         let animate = SKAction.animate(with: imageArray, timePerFrame: 0.2) //0.2
         let wait = SKAction.wait(forDuration: spd * 0.01 * Double(imageArray.count))
@@ -150,9 +151,9 @@ class Zombie: SKSpriteNode {
         var imageArray: [SKTexture] = [SKTexture]()
         
         //Images  20 , 29 - 32 are falling for zombies
-        imageArray.append(SKTexture(imageNamed: "\(imageName)\(rand)0020"))
+        imageArray.append(SKTexture(imageNamed: "\(imageName)\(zombieImage)0020"))
         for i in 29...32 {
-            imageArray.append(SKTexture(imageNamed: "\(imageName)\(rand)00\(i)"))
+            imageArray.append(SKTexture(imageNamed: "\(imageName)\(zombieImage)00\(i)"))
         }
         let animate = SKAction.animate(with: imageArray, timePerFrame: spd * 0.01) //0.2
         let wait = SKAction.wait(forDuration: spd * 0.01 * Double(imageArray.count))
@@ -216,7 +217,7 @@ class Zombie: SKSpriteNode {
         var imageArray: [SKTexture] = [SKTexture]()
         //Images 13 - 19 are attacking for zombies
         for i in 13...19 {
-            imageArray.append(SKTexture(imageNamed: "\(imageName)\(rand)00\(i)"))
+            imageArray.append(SKTexture(imageNamed: "\(imageName)\(zombieImage)00\(i)"))
         }
         let animate = SKAction.repeatForever(SKAction.animate(with: imageArray, timePerFrame: spd * 0.01)) //0.2
         self.run(animate, withKey: "animationAttack")
@@ -240,9 +241,9 @@ class Zombie: SKSpriteNode {
         //Images 4 - 12 are walking for zombies
         for i in 4...12 {
             if i > 9 {
-                imageArray.append(SKTexture(imageNamed: "\(imageName)\(rand)00\(i)"))
+                imageArray.append(SKTexture(imageNamed: "\(imageName)\(zombieImage)00\(i)"))
             } else if i <= 9 {
-                imageArray.append(SKTexture(imageNamed: "\(imageName)\(rand)000\(i)"))
+                imageArray.append(SKTexture(imageNamed: "\(imageName)\(zombieImage)000\(i)"))
             }
         }
         let animate = SKAction.repeatForever(SKAction.animate(with: imageArray, timePerFrame: spd * 0.005)) //0.1
@@ -273,15 +274,19 @@ class Zombie: SKSpriteNode {
         }
         switch zombieType {
         case .fast:
+            //Set the image
+            zombieImage = 5
             //size of the fast zombie
             self.xScale = 0.13
             self.yScale = 0.13
             //Health of the fast zombie
             self.health = 1
             //Spd of the fast zombie
-            self.spd = 10.0
+            self.spd = 7.5
             break
         case .normal:
+            //Set the image
+            zombieImage = Int(arc4random_uniform(2)) + 1
             //size of the normal zombie
             self.xScale = 0.13
             self.yScale = 0.13
@@ -291,6 +296,8 @@ class Zombie: SKSpriteNode {
             self.spd = 20.0
             break
         case .big:
+            //Set the image
+            zombieImage = 4
             //size of the big zombie
             self.xScale = 0.15
             self.yScale = 0.15
