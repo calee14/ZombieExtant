@@ -30,16 +30,43 @@ class TopGun: SKSpriteNode {
     func removeHealth() {
         self.health -= 10
         
+        //Initializing the particle emitter: Smoke
+        let smokeEmitter = gameScene.childNode(withName: "\(self.name!)Smoke") as! SKEmitterNode
+        smokeEmitter.particleBirthRate += 1
+        
+        //Initializing the particle emitter: Sparkds
+        let particle = SKEmitterNode(fileNamed: "Sparks")!
+        self.addChild(particle)
+        let randX: CGFloat = CGFloat(arc4random_uniform(UInt32(self.size.width))) - self.size.width / 2
+        let randY: CGFloat = CGFloat(arc4random_uniform(UInt32(self.size.height))) - self.size.height / 2
+        particle.position = CGPoint(x: randX, y: randY)
+        particle.setScale(2.0)
+        particle.zPosition = 6
+        let wait = SKAction.wait(forDuration: 0.3)
+        let remove = SKAction.run({
+            particle.removeFromParent()
+        })
+        let seq = SKAction.sequence([wait, remove])
+        self.run(seq)
+        
         //Check if health is 0 then remove the turret
         if health <= 0 {
             
             var imageArray: [SKTexture] = [SKTexture]()
+            
             for i in 1...7 {
+                //Appending 7 images
                 imageArray.append(SKTexture(imageNamed: "explosion\(i)"))
             }
+            //Adding the explosions
             let animate = SKAction.animate(with: imageArray, timePerFrame: 0.1)
             
+            //Removing the base
             let removeTurret = SKAction.run({ [unowned self] in
+                let smokeEmitter = self.gameScene.childNode(withName: "\(self.name!)Smoke") as! SKEmitterNode
+                smokeEmitter.zPosition = 5
+                smokeEmitter.particleBirthRate = 5
+                
                 self.removeFromParent()
             })
             
@@ -48,13 +75,26 @@ class TopGun: SKSpriteNode {
                 base.physicsBody = nil
             })
             
-            let runAnimation = SKAction.run({ [unowned self] in
+            //Initializing the explosions
+            let firstExplosion = SKAction.run({
                 self.explosion1.run(animate)
+            })
+            let secondExplosion = SKAction.run({
                 self.explosion2.run(animate)
+            })
+            let thirdExplosion = SKAction.run({
                 self.explosion3.run(animate)
             })
             
-            let wait = SKAction.wait(forDuration: 0.8)
+            let runAnimation = SKAction.run({ [unowned self] in
+                //Run the death animation
+                self.run(SKAction.sequence([SKAction.wait(forDuration: 0), firstExplosion]))
+                self.run(SKAction.sequence([SKAction.wait(forDuration: 0.1), secondExplosion]))
+                self.run(SKAction.sequence([SKAction.wait(forDuration: 0.2), thirdExplosion]))
+                
+            })
+            
+            let wait = SKAction.wait(forDuration: 1.0)
             let seq = SKAction.sequence([runAnimation, wait , removeBase, removeTurret])
             self.run(seq)
         }

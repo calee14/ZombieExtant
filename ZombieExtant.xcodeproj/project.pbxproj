@@ -150,6 +150,10 @@
 		B36620781F3147F8007310E8 /* zombie20030.png in Resources */ = {isa = PBXBuildFile; fileRef = B36620741F3147F8007310E8 /* zombie20030.png */; };
 		B36620791F3147F8007310E8 /* zombie20031.png in Resources */ = {isa = PBXBuildFile; fileRef = B36620751F3147F8007310E8 /* zombie20031.png */; };
 		B366207A1F3147F8007310E8 /* zombie20032.png in Resources */ = {isa = PBXBuildFile; fileRef = B36620761F3147F8007310E8 /* zombie20032.png */; };
+		B366207C1F3268C2007310E8 /* Smoking.sks in Resources */ = {isa = PBXBuildFile; fileRef = B366207B1F3268C2007310E8 /* Smoking.sks */; };
+		B366207E1F32776E007310E8 /* Sparks.sks in Resources */ = {isa = PBXBuildFile; fileRef = B366207D1F32776E007310E8 /* Sparks.sks */; };
+		B36620801F328135007310E8 /* MainMenu.sks in Resources */ = {isa = PBXBuildFile; fileRef = B366207F1F328135007310E8 /* MainMenu.sks */; };
+		B36620821F32818D007310E8 /* MainMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = B36620811F32818D007310E8 /* MainMenu.swift */; };
 		B38456691F26B41300D7E448 /* Base1.png in Resources */ = {isa = PBXBuildFile; fileRef = B38456671F26B41300D7E448 /* Base1.png */; };
 		B384566A1F26B41300D7E448 /* MG_Tier3.png in Resources */ = {isa = PBXBuildFile; fileRef = B38456681F26B41300D7E448 /* MG_Tier3.png */; };
 		B384566C1F26B68700D7E448 /* TopGun.swift in Sources */ = {isa = PBXBuildFile; fileRef = B384566B1F26B68700D7E448 /* TopGun.swift */; };
@@ -303,6 +307,10 @@
 		B36620741F3147F8007310E8 /* zombie20030.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = zombie20030.png; sourceTree = "<group>"; };
 		B36620751F3147F8007310E8 /* zombie20031.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = zombie20031.png; sourceTree = "<group>"; };
 		B36620761F3147F8007310E8 /* zombie20032.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = zombie20032.png; sourceTree = "<group>"; };
+		B366207B1F3268C2007310E8 /* Smoking.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Smoking.sks; sourceTree = "<group>"; };
+		B366207D1F32776E007310E8 /* Sparks.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Sparks.sks; sourceTree = "<group>"; };
+		B366207F1F328135007310E8 /* MainMenu.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = MainMenu.sks; sourceTree = "<group>"; };
+		B36620811F32818D007310E8 /* MainMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainMenu.swift; sourceTree = "<group>"; };
 		B38456671F26B41300D7E448 /* Base1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Base1.png; sourceTree = "<group>"; };
 		B38456681F26B41300D7E448 /* MG_Tier3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MG_Tier3.png; sourceTree = "<group>"; };
 		B384566B1F26B68700D7E448 /* TopGun.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TopGun.swift; sourceTree = "<group>"; };
@@ -373,8 +381,10 @@
 			children = (
 				B32827741F243575005CA3B6 /* AppDelegate.swift */,
 				B32827761F243575005CA3B6 /* GameScene.sks */,
+				B366207F1F328135007310E8 /* MainMenu.sks */,
 				B32827781F243575005CA3B6 /* Actions.sks */,
 				B328277A1F243575005CA3B6 /* GameScene.swift */,
+				B36620811F32818D007310E8 /* MainMenu.swift */,
 				B328277C1F243575005CA3B6 /* GameViewController.swift */,
 				B384566B1F26B68700D7E448 /* TopGun.swift */,
 				B396CC371F27BC2D00C1C11E /* Bullet.swift */,
@@ -386,6 +396,8 @@
 				B32827861F243575005CA3B6 /* Info.plist */,
 				B3237FD71F2BD99800EAC2E8 /* TurretActions.sks */,
 				B3661FB91F30F6F1007310E8 /* TurretExplosion.sks */,
+				B366207B1F3268C2007310E8 /* Smoking.sks */,
+				B366207D1F32776E007310E8 /* Sparks.sks */,
 			);
 			path = ZombieExtant;
 			sourceTree = "<group>";
@@ -622,9 +634,12 @@
 				B3237FD41F2BD7CF00EAC2E8 /* explosion2.png in Resources */,
 				B36620651F3147DA007310E8 /* zombie20007.png in Resources */,
 				B32827801F243575005CA3B6 /* Main.storyboard in Resources */,
+				B36620801F328135007310E8 /* MainMenu.sks in Resources */,
+				B366207E1F32776E007310E8 /* Sparks.sks in Resources */,
 				B36620791F3147F8007310E8 /* zombie20031.png in Resources */,
 				B352064B1F2BA37300BD2750 /* zombie10013.png in Resources */,
 				B3237FC61F2BB98F00EAC2E8 /* zombie10031.png in Resources */,
+				B366207C1F3268C2007310E8 /* Smoking.sks in Resources */,
 				B32827771F243575005CA3B6 /* GameScene.sks in Resources */,
 				B3237FC41F2BB98F00EAC2E8 /* zombie10029.png in Resources */,
 				B3661FBA1F30F6F1007310E8 /* TurretExplosion.sks in Resources */,
@@ -763,6 +778,7 @@
 			files = (
 				B384566C1F26B68700D7E448 /* TopGun.swift in Sources */,
 				B328277B1F243575005CA3B6 /* GameScene.swift in Sources */,
+				B36620821F32818D007310E8 /* MainMenu.swift in Sources */,
 				B396CC381F27BC2D00C1C11E /* Bullet.swift in Sources */,
 				B328277D1F243575005CA3B6 /* GameViewController.swift in Sources */,
 				B32827751F243575005CA3B6 /* AppDelegate.swift in Sources */,

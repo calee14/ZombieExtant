@@ -30,6 +30,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var rightSpawn: SKSpriteNode!
     var leftSpawn: SKSpriteNode!
     var bottomSpawn: SKSpriteNode!
+    //Smoke emmiters
+    var topGunSmoke: SKEmitterNode!
+    var leftGunSmoke: SKEmitterNode!
+    var rightGunSmoke: SKEmitterNode!
     //UI objects
     var ammoLabel: SKLabelNode!
     var waveLabel: SKLabelNode!
@@ -40,7 +44,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var spawnTimer: CFTimeInterval = 0
     var stagerTimer: UInt32 = 6
     //Wave Controller
-    var waveNum = 1
+    var waveNum = 5
     var zombieCount = 0
     var zombieSpawned = 0
     var zombieOnGroundCount = 0
@@ -68,6 +72,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         topGun = self.childNode(withName: "//topGun") as! TopGun
         leftGun = self.childNode(withName: "//leftGun") as! TopGun
         rightGun = self.childNode(withName: "//rightGun") as! TopGun
+        
+        //Connect the Emmiter Nodes
+        topGunSmoke = self.childNode(withName: "topGunSmoke") as! SKEmitterNode
+        leftGunSmoke = self.childNode(withName: "leftGunSmoke") as! SKEmitterNode
+        rightGunSmoke = self.childNode(withName: "rightGunSmoke") as! SKEmitterNode
         
         //Connect the UI objects
         waveLabel = self.childNode(withName: "waveLabel") as! SKLabelNode
@@ -250,19 +259,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             //Gets the value of the num of zombies in the wave
             //Important for spawning the entire wave
             zombieCount = waveNum * filterZombiesPerWave
-            if waveNum >= 5 {
-                if filterZombiesPerWave >= 28 {
-                    filterZombiesPerWave = 28
-                } else {
-                    filterZombiesPerWave += 2
-                }
-            }
             
             //Wave spawning editor
             if waveNum < 5 {
                 //Number of spawns editor
-                zombieCount = waveNum * filterZombiesPerWave
-                zombiesInTheWave = waveNum * filterZombiesPerWave
+                zombieCount = waveNum * 24
+                zombiesInTheWave = waveNum * 24
             } else if waveNum >= 5 {
                 //96 is four 24 * num of spawners which is 4
                 //4 is for every level after 5
@@ -273,7 +275,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             waveBegan = true
         }
         
-        if waveBegan == false { return }
+        //if waveBegan == false { return }
         
         if zombieSpawned < zombiesInTheWave {
             print("zombies \(zombieSpawned) count \(zombieOnGroundCount)")
@@ -296,22 +298,37 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             waveLabel.text = "Wave: \(waveNum)"
             spawnWave(wave: waveNum)
             print("wave count = \(waveNum)")
+            //update our filter zombies
+            //1008
+            if waveNum > 5 {
+                if filterZombiesPerWave >= 28 {
+                    filterZombiesPerWave = 28
+                } else {
+                    filterZombiesPerWave += 2
+                }
+            }
         }
     }
     
     func spawnWave(wave: Int) {
         //Get the total num zombies for the wave
         
+        if waveBegan == false {
+            return
+        }
         var zombiesPerSpawner = Int(zombiesInTheWave / 4)
+        //This is the problem
         if wave < 6 {
             zombiesPerSpawner = 24 / 4
         }
         //Filter the num of zombies per spawner
-        if zombiesPerSpawner > filterZombiesPerWave {
+        if zombiesPerSpawner >= filterZombiesPerWave {
             zombiesPerSpawner = filterZombiesPerWave
         }
+        print("filter zombies \(filterZombiesPerWave)")
+        print("zombies per spawner = \(zombiesPerSpawner)")
         //Update the spawned num of zombies
-        zombieSpawned += zombiesPerSpawner * 4
+        zombieSpawned += zombiesPerSpawner * 4 // zombiePerSpawner is the error != filter
         zombieOnGroundCount += zombiesPerSpawner * 4
         
         //Top spawn
