@@ -17,8 +17,10 @@ class TopGun: SKSpriteNode {
     var explosion2: SKSpriteNode!
     var explosion3: SKSpriteNode!
     var muzzle: SKSpriteNode!
+    var image = 1
     
     func turnGun(destPoint: CGPoint) {
+        
         //turns the gun
         let adjust = Double.pi/2.0
         let v1 = CGVector(dx:0, dy:1)
@@ -106,13 +108,23 @@ class TopGun: SKSpriteNode {
         let animation = SKAction.init(named: "muzzle")
         self.muzzle.run(animation!, withKey: "muzzle")
         
+        if image == 1 {
+            self.texture = SKTexture(imageNamed: "MG_Tier3")
+            image = 2
+        } else if image == 2 {
+            self.texture = SKTexture(imageNamed: "MG_Tier32")
+            image = 1
+        }
+        
         //Adding the bullet to the scene
         let bullet = Bullet()
+        bullet.zPosition = 10000
         gameScene.bulletLayer.addChild(bullet)
         //gameScene.addChild(bullet)
         
         //Get the bullet ready to shoot
-        bullet.position = self.position
+        bullet.position.x = self.position.x + CGFloat(arc4random_uniform(8)) - 4
+        bullet.position.y = self.position.y + CGFloat(arc4random_uniform(8)) - 4
         bullet.zRotation = self.zRotation
         
         //Let it rip
@@ -120,6 +132,8 @@ class TopGun: SKSpriteNode {
     }
     
     func connectExplosion() {
+        //Set up turret here
+        
         explosion1 = self.childNode(withName: "explosion1") as! SKSpriteNode
         explosion2 = self.childNode(withName: "explosion2") as! SKSpriteNode
         explosion3 = self.childNode(withName: "explosion3") as! SKSpriteNode
@@ -130,9 +144,11 @@ class TopGun: SKSpriteNode {
         super.init(texture: texture, color: color, size: size)
         
     }
+    
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         
         connectExplosion()
+        self.zPosition = 10000
     }
 }

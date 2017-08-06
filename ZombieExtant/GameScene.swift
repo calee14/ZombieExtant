@@ -44,14 +44,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var spawnTimer: CFTimeInterval = 0
     var stagerTimer: UInt32 = 6
     //Wave Controller
-    var waveNum = 5
+    var waveNum = 1
     var zombieCount = 0
     var zombieSpawned = 0
     var zombieOnGroundCount = 0
     var waveBegan = false
-    var filterZombiesPerWave = 24
+    var filterZombiesPerWave = 18
     var zombiesInTheWave = 0
-    
+    var zombieZ = 0
+    var fastBigZombies = 97
+    var normalZombies = 90 {
+        didSet {
+            fastBigZombies = 100 - ((100 - normalZombies) / 2)
+        }
+    }
     override func didMove(to view: SKView) {
         //Set up scene here
         
@@ -92,6 +98,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let touch = touches.first!
         let location = touch.location(in: self)
         
+        if turretLayer.children.count == 0 { return }
         //Creating an array to store our data
         var arrayDist: [(turret: Int, dist: CGFloat)] = []
         
@@ -226,6 +233,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
+        
         print("zombie count = \(zombieCount)")
         //Manages the waves
         waveManager()
@@ -239,7 +247,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         for bullet in bulletLayer.children as! [Bullet] {
             print(bulletLayer.children)
-            if bullet.position.x > 600 || bullet.position.x < -50 {
+            if bullet.position.x > 578 || bullet.position.x < -10 {
                 bullet.removeFromParent()
                 print("remove it")
             } else if bullet.position.y > 330 || bullet.position.y < -10 {
@@ -261,17 +269,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             zombieCount = waveNum * filterZombiesPerWave
             
             //Wave spawning editor
-            if waveNum < 5 {
+            if waveNum < 6 {
                 //Number of spawns editor
                 zombieCount = waveNum * 24
                 zombiesInTheWave = waveNum * 24
-            } else if waveNum >= 5 {
+            } else if waveNum >= 6 {
                 //96 is four 24 * num of spawners which is 4
                 //4 is for every level after 5
                 //The mulitplier will need to be divisible by 4 and the result must be the filterZombiePerWave
                 zombieCount = (waveNum - 4) * filterZombiesPerWave * 4 // 96
                 zombiesInTheWave = (waveNum - 4) * filterZombiesPerWave * 4 // 96
+                
+                //Filter the num of zombies coming in
+                if waveNum > 11 {
+                    zombieCount = (11 - 4) * filterZombiesPerWave * 4 // 96
+                    zombiesInTheWave = (11 - 4) * filterZombiesPerWave * 4 // 96
+                }
             }
+            zombieZ = zombiesInTheWave + 6
             waveBegan = true
         }
         
@@ -293,18 +308,35 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             zombieSpawned = 0
             zombieOnGroundCount = 0
             waveBegan = false
+            
             //Start a new wave
             waveNum += 1
             waveLabel.text = "Wave: \(waveNum)"
             spawnWave(wave: waveNum)
             print("wave count = \(waveNum)")
             //update our filter zombies
+            //896
             //1008
-            if waveNum > 5 {
-                if filterZombiesPerWave >= 28 {
-                    filterZombiesPerWave = 28
+            if waveNum > 6 {
+                //get more zombies with abilities
+                if normalZombies > 60 {
+                    normalZombies -= 2
+                }
+                print("normal Zombies = \(normalZombies)")
+                print("fastBig Zombies = \(fastBigZombies)")
+                //update the filter zombies per wave
+                if filterZombiesPerWave >= 26 {
+                    filterZombiesPerWave = 26
                 } else {
                     filterZombiesPerWave += 2
+                }
+                if waveNum > 11 {
+                    //Start adding more zombies again
+                    if filterZombiesPerWave >= 28 {
+                        filterZombiesPerWave = 28
+                    } else {
+                        filterZombiesPerWave += 2
+                    }
                 }
             }
         }
@@ -317,10 +349,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             return
         }
         var zombiesPerSpawner = Int(zombiesInTheWave / 4)
-        //This is the problem
+        
         if wave < 6 {
             zombiesPerSpawner = 24 / 4
         }
+        
         //Filter the num of zombies per spawner
         if zombiesPerSpawner >= filterZombiesPerWave {
             zombiesPerSpawner = filterZombiesPerWave
@@ -362,7 +395,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 randPosition = CGPoint(x: randX, y: randY)
             } else if spawner.name == "leftSpawn" {
                 //Create the leftSpawn rand position
-                let randX = -1 * (CGFloat(arc4random_uniform(UInt32(spawner.position.x + spawner.size.width)))) - distanceCounter / 4
+                let randX = -1 * (CGFloat(arc4random_uniform(UInt32(spawner.position.x + spawner.size.width + 100)))) - distanceCounter / 4
                 let randY = CGFloat(arc4random_uniform(UInt32(spawner.position.y + spawner.size.height))) + distanceCounter / 4
                 randPosition = CGPoint(x: randX, y: randY)
             } else if spawner.name == "bottomSpawn" {
@@ -375,17 +408,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             //Add a zombie to the scene
             let newZombie = Zombie()
             newZombie.gameScene = self
+            newZombie.zPosition = CGFloat(zombieZ)
+            zombieZ -= 1
             
             //Level editor
-            
-            if waveNum == 2 {
+            if waveNum == 1 {
+                newZombie.zombieType = .normal
+            } else if waveNum == 2 {
                 //let rand = arc4random_uniform(100)
                 newZombie.zombieType = .fast
             } else if waveNum == 3 {
                 //Big zombies
                 newZombie.zombieType = .big
-            } else {
-                newZombie.spd = 20.0 //Double(arc4random_uniform(4)) + 20.0
+            } else if waveNum <= 5 {
+                newZombie.pickRandomZombieType(normal: 90, fast: 95, big: 100)
+            } else if waveNum >= 6 {
+                newZombie.pickRandomZombieType(normal: Double(normalZombies), fast: Double(fastBigZombies), big: 100)
             }
             
             newZombie.setZombieType()

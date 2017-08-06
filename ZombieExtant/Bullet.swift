@@ -30,12 +30,6 @@ class Bullet: SKSpriteNode {
         self.physicsBody?.applyForce(vector)
     }
     
-    func checkPosition() {
-        //check if outside screen
-            //remove if outside screen
-        // else return
-    }
-    
     override init(texture: SKTexture?, color: UIColor, size: CGSize) {
         super.init(texture: texture, color: color, size: size)
         

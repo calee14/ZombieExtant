@@ -20,18 +20,27 @@ enum ZombieActions {
 class Zombie: SKSpriteNode {
     
     weak var gameScene: GameScene!
+    weak var mainMenu: MainMenu!
+    
+    /* Game Scene Variables */
     var spd = 20.0
     weak var target: TopGun!
     var zombieType: ZombieType = .normal
     var health = 1
     var zombieAction: ZombieActions = .idle
     var zombieImage = 1
+    var initialScale = 0.13
+    var zombieScene: SKScene!
+    /* Main Menu Variables */
+    var finalPos: CGPoint!
     
+    /* GameScene Function */
     func moveToClosestTurret() {
         print("we are moving")
         
         if self.zombieAction == .death { return }
         
+        self.removeAllActions()
         //Animate the zombie for the specific action
         //Keep track of what the zombie is doing
         self.zombieAction = .walk
@@ -86,6 +95,10 @@ class Zombie: SKSpriteNode {
                 self.target = nil
                 self.moveToClosestTurret()
         })
+        
+        //Check Note may remove due to difficulty
+        /* Checking implementation */
+            /* put movement here */
     }
     
     func takeHitAnimation() {
@@ -96,12 +109,11 @@ class Zombie: SKSpriteNode {
         
         //Animation scaling for the walking zombie
         if self.position.x < gameScene.size.width / 2 {
-            self.xScale = xScale
+            self.xScale = CGFloat(initialScale * -1)
         } else if self.position.x < gameScene.size.width / 2 {
             self.xScale = xScale
         }
         //let rand = Int(arc4random_uniform(4)) + 1
-        let rand = 1
         let imageName = "zombie"
         var imageArray: [SKTexture] = [SKTexture]()
         
@@ -141,12 +153,11 @@ class Zombie: SKSpriteNode {
         
         //Animation for the walking zombie
         if self.position.x < gameScene.size.width / 2 {
-            self.xScale = xScale
+            self.xScale = CGFloat(initialScale * -1)
         } else if self.position.x < gameScene.size.width / 2 {
             self.xScale = xScale
         }
         //let rand = Int(arc4random_uniform(4)) + 1
-        let rand = 1
         let imageName = "zombie"
         var imageArray: [SKTexture] = [SKTexture]()
         
@@ -207,12 +218,11 @@ class Zombie: SKSpriteNode {
         //Animaiton for the attacking zombie
         self.removeAction(forKey: "walk")
         if self.position.x < gameScene.size.width / 2 {
-            self.xScale = self.xScale
+            self.xScale = CGFloat(initialScale * -1)
         } else if self.position.x < gameScene.size.width / 2 {
             self.xScale = self.xScale
         }
         //let rand = Int(arc4random_uniform(4)) + 1
-        let rand = 1
         let imageName = "zombie"
         var imageArray: [SKTexture] = [SKTexture]()
         //Images 13 - 19 are attacking for zombies
@@ -230,12 +240,11 @@ class Zombie: SKSpriteNode {
         self.removeAllActions()
         //Animation for the walking zombie
         if self.position.x < gameScene.size.width / 2 {
-            self.xScale *= -1
+            self.xScale = CGFloat(initialScale * -1)
         } else if self.position.x < gameScene.size.width / 2 {
             self.xScale = self.xScale
         }
         //let rand = Int(arc4random_uniform(4)) + 1
-        let rand = 1
         let imageName = "zombie"
         var imageArray: [SKTexture] = [SKTexture]()
         //Images 4 - 12 are walking for zombies
@@ -250,7 +259,7 @@ class Zombie: SKSpriteNode {
         self.run(animate, withKey: "walk")
     }
     
-    func pickRandomZombieType(fast: Double, normal: Double, big: Double) {
+    func pickRandomZombieType(normal: Double, fast: Double, big: Double) {
         let randNum = Double(arc4random_uniform(100))
         if randNum < normal {
             //Zombie is normal type
@@ -272,6 +281,7 @@ class Zombie: SKSpriteNode {
         } else if self.position.x < gameScene.size.width / 2 {
             self.xScale = xScale
         }
+        
         switch zombieType {
         case .fast:
             //Set the image
@@ -279,6 +289,7 @@ class Zombie: SKSpriteNode {
             //size of the fast zombie
             self.xScale = 0.13
             self.yScale = 0.13
+            initialScale = 0.13
             //Health of the fast zombie
             self.health = 1
             //Spd of the fast zombie
@@ -290,6 +301,7 @@ class Zombie: SKSpriteNode {
             //size of the normal zombie
             self.xScale = 0.13
             self.yScale = 0.13
+            initialScale = 0.13
             //Health of the normal zombie
             self.health = 1
             //Spd of the normal zombie
@@ -299,8 +311,9 @@ class Zombie: SKSpriteNode {
             //Set the image
             zombieImage = 4
             //size of the big zombie
-            self.xScale = 0.15
-            self.yScale = 0.15
+            self.xScale = 0.16
+            self.yScale = 0.16
+            initialScale = 0.16
             //Health of the big zombie
             self.health = 2
             //Spd of the big zombie
@@ -308,6 +321,9 @@ class Zombie: SKSpriteNode {
             break
         }
     }
+    
+    /* End of GameScene Funtions */
+    
     override init(texture: SKTexture?, color: UIColor, size: CGSize) {
         super.init(texture: texture, color: color, size: size)
         
