@@ -15,11 +15,101 @@ class MainMenu: SKScene {
     var fixedDelta: CFTimeInterval = 1.0/60.0 // 60FPS
     var zombieLayer: SKNode!
     var zombieZ = 6
+    var spawnZombies = true
+    
+    /* Ui */
+    var playButton: MSButtonNode!
+    var title: SKNode!
     
     override func didMove(to view: SKView) {
         //Set up scene here
         zombieLayer = self.childNode(withName: "zombieLayer")!
         
+        title = self.childNode(withName: "title")!
+        
+        playButton = self.childNode(withName: "playButton") as! MSButtonNode
+        playButton.selectedHandler = { [unowned self] in
+            /* Play Button Handler*/
+            
+            //Move the title out of the screen
+            let moveTitle = SKAction.move(to: CGPoint(x: self.title.position.x, y: self.size.height + 100) , duration: 1.0)
+            self.title.run(moveTitle)
+            
+            //Dissable the button
+            self.playButton.isDisabled = true
+            
+            //Action to move the button
+            let moveButton = SKAction.move(to: CGPoint(x: self.size.width / 2, y: -(self.playButton.size.height)) , duration: 0.5)
+            self.playButton.run(moveButton)
+            
+            //Stop spawning the zombies
+            self.spawnZombies = false
+            
+            //Apply the action to all of the zombies based on their position
+            for zombie in self.zombieLayer.children as! [Zombie] {
+                if zombie.zombieAction == .death { continue }
+                
+                //Stop the current action
+                zombie.removeAllActions()
+                
+                //Get the move positon
+                var moveToPosition = CGPoint()
+                if zombie.position.y < self.size.height / 2 {
+                    //If the zombie is on the bottom half of the scene
+                    if zombie.position.x < self.size.width / 2 {
+                        //Bottom Left
+                        moveToPosition = CGPoint(x: -zombie.size.width, y: CGFloat(arc4random_uniform(UInt32(self.size.height / 2))))
+                        print(moveToPosition)
+                        if zombie.position.x < self.size.width / 5 {
+                            //If it is closer to the left wall than bottom
+                            moveToPosition = CGPoint(x: -zombie.size.width, y: CGFloat(arc4random_uniform(UInt32(self.size.height / 2))))
+                        }
+                    } else if zombie.position.x > self.size.width / 2 {
+                        //Bottom Right
+                        moveToPosition = CGPoint(x: CGFloat(CGFloat(arc4random_uniform(UInt32(self.size.width / 2))) + (self.size.width / 2)) , y: -zombie.size.height)
+                        print(moveToPosition)
+                        if zombie.position.x > self.size.width - self.size.width / 5 {
+                            //If it is closer to the right wall than bottom
+                            moveToPosition = CGPoint(x: self.size.width + zombie.size.width, y: CGFloat(arc4random_uniform(UInt32(self.size.height / 2))))
+                        }
+                    }
+                } else if zombie.position.y > self.size.height / 2 {
+                    //If the zombie is on the top half of the scene
+                    if zombie.position.x < self.size.width / 2 {
+                        //Top Left
+                        moveToPosition = CGPoint(x: CGFloat(arc4random_uniform(UInt32(self.size.width / 2))), y: self.size.height + zombie.size.height)
+                        print(moveToPosition)
+                        if zombie.position.x < self.size.width / 5 {
+                            //If it is closer to the left then the top
+                            moveToPosition = CGPoint(x: -zombie.size.width, y: CGFloat(arc4random_uniform(UInt32(self.size.height / 2))) + self.size.height / 2)
+                        }
+                    } else if zombie.position.x > self.size.width / 2 {
+                        //Top Right
+                        moveToPosition = CGPoint(x: CGFloat(CGFloat(arc4random_uniform(UInt32(self.size.width / 2))) + (self.size.width / 2)) , y: self.size.height + zombie.size.height)
+                        print(moveToPosition)
+                        if zombie.position.x > self.size.width - self.size.width / 5 {
+                            //If it is closer to the right then the top
+                            moveToPosition = CGPoint(x: self.size.width + zombie.size.width, y: CGFloat(arc4random_uniform(UInt32(self.size.height / 2))) + self.size.height / 2)
+                        }
+                    }
+                }
+                //Run the anitmation
+                self.animateZombie(newNode: zombie)
+                let moveTo = SKAction.move(to: moveToPosition, duration: TimeInterval(TimeInterval(arc4random_uniform(UInt32(0.5)) + 1)))
+                    zombie.run(moveTo, completion: {
+                    zombie.removeFromParent()
+                })
+            }
+            //Then change the scene
+            let wait = SKAction.wait(forDuration: 2.0)
+            let changeScene = SKAction.run({ [unowned self] in
+                self.loadGame(fileName: "GameScene")
+            })
+            let seq = SKAction.sequence([wait, changeScene])
+            self.run(seq)
+        }
+        
+        //Start to spawn the zombies
         spawnZombies(num: 7)
     }
     
@@ -43,11 +133,14 @@ class MainMenu: SKScene {
     override func update(_ currentTime: TimeInterval) {
         //Gets called every frame that is rendered
         
+        if spawnZombies == false { return }
+        
         if timer > 1.5 {
             if zombieLayer.children.count >= 150 { return }
             spawnZombies(num: 10)
             timer = 0
         }
+        
         timer += fixedDelta
     }
     
@@ -109,9 +202,9 @@ class MainMenu: SKScene {
         
         //Animation for the walking zombie
         if self.position.x < self.size.width / 2 {
-            self.xScale = CGFloat(newNode.initialScale * -1)
+            newNode.xScale = CGFloat(newNode.initialScale * -1)
         } else if self.position.x < self.size.width / 2 {
-            self.xScale = xScale
+            newNode.xScale = xScale
         }
         //let rand = Int(arc4random_uniform(4)) + 1
         let imageName = "zombie"
@@ -205,5 +298,31 @@ class MainMenu: SKScene {
         }
         let animate = SKAction.repeatForever(SKAction.animate(with: imageArray, timePerFrame: newNode.spd * 0.005)) //0.1
         newNode.run(animate, withKey: "walk")
+    }
+    
+    func loadGame(fileName: String) {
+        //Grab reference to our sprite kit view
+        
+        //1) grab reference to our spriteKit view
+        guard let skView = self.view as SKView! else {
+            print("could not get SKView")
+            return
+        }
+        //2) Load game scene
+        guard let scene = SKScene(fileNamed: fileName) else {
+            print("Could not make GameScene, check the name is spelled correctly")
+            return
+        }
+        //Enusre the aspect mode is correct
+        scene.scaleMode = .aspectFit
+        
+        //Show Debug
+        skView.showsPhysics = true
+        skView.showsDrawCount = true
+        skView.showsFPS = true
+        
+        //4)
+        skView.presentScene(scene)
+        
     }
 }

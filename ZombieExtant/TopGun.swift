@@ -78,13 +78,13 @@ class TopGun: SKSpriteNode {
             })
             
             //Initializing the explosions
-            let firstExplosion = SKAction.run({
+            let firstExplosion = SKAction.run({ [unowned self] in
                 self.explosion1.run(animate)
             })
-            let secondExplosion = SKAction.run({
+            let secondExplosion = SKAction.run({ [unowned self] in
                 self.explosion2.run(animate)
             })
-            let thirdExplosion = SKAction.run({
+            let thirdExplosion = SKAction.run({ [unowned self] in
                 self.explosion3.run(animate)
             })
             

@@ -9,11 +9,10 @@
 import SpriteKit
 import GameplayKit
 
-//TODO: Add ammo
-//TODO: Add collectables
-//TODO: tweak difficulty
-//TODO: change the difficulty for wave 2, 3
-//
+enum ZombieGameState {
+    case wave, stop, destroy
+}
+
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
     //Connect Game Objects
@@ -53,6 +52,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var zombiesInTheWave = 0
     var zombieZ = 0
     var fastBigZombies = 97
+    var zombiePause: ZombieGameState = .wave
     var normalZombies = 90 {
         didSet {
             fastBigZombies = 100 - ((100 - normalZombies) / 2)
@@ -126,8 +126,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 minimum = item.turret
             }
         }
+        
         //Turns the turret
         let turretChildren = turretLayer.children as! [TopGun]
+        if turretChildren[minimum].health <= 0 { return }
         turretChildren[minimum].turnGun(destPoint: location)
         turretChildren[minimum].fireBullet()
         print(minimum)
@@ -234,6 +236,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
         
+        if turretLayer.children.count == 0 {
+            if zombiePause == .stop { return }
+            zombiePause = .stop
+            if turretLayer.children.count == 0 {
+                stopAllZombies()
+            }
+        }
         print("zombie count = \(zombieCount)")
         //Manages the waves
         waveManager()
@@ -259,6 +268,28 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         //Update timers
         //spawnTimer += fixedDelta
+    }
+    
+    func stopAllZombies() {
+        zombiePause = .destroy
+        //Should start deleting after restart sreen pops up
+        var waitTime = 1.0
+        for zombie in zombieLayer.children as! [Zombie] {
+            zombie.removeAllActions()
+            let wait = SKAction.wait(forDuration: waitTime)
+            let removeZombie = SKAction.run({
+                zombie.removeFromParent()
+            })
+            let seq = SKAction.sequence([wait, removeZombie])
+            run(seq)
+            waitTime += 0.05
+        }
+        let loadMenu = SKAction.run({ [unowned self] in
+            self.loadGame(fileName: "MainMenu")
+        })
+        let wait = SKAction.wait(forDuration: 3)
+        let seq = SKAction.sequence([wait, loadMenu])
+        self.run(seq)
     }
     
     func waveManager() {
@@ -448,5 +479,31 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let xDist = dist1.x - dist2.x
         let yDist = dist1.y - dist2.y
         return CGFloat(sqrt((xDist * xDist) + (yDist * yDist)))
+    }
+    
+    func loadGame(fileName: String) {
+        //Grab reference to our sprite kit view
+        
+        //1) grab reference to our spriteKit view
+        guard let skView = self.view as SKView! else {
+            print("could not get SKView")
+            return
+        }
+        //2) Load game scene
+        guard let scene = SKScene(fileNamed: fileName) else {
+            print("Could not make GameScene, check the name is spelled correctly")
+            return
+        }
+        //Enusre the aspect mode is correct
+        scene.scaleMode = .aspectFit
+        
+        //Show Debug
+        skView.showsPhysics = true
+        skView.showsDrawCount = true
+        skView.showsFPS = true
+        
+        //4)
+        skView.presentScene(scene)
+        
     }
 }
