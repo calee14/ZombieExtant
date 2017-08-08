@@ -24,6 +24,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var bulletLayer: SKNode!
     var turretLayer: SKNode!
     var zombieLayer: SKNode!
+    var baseLayer: SKNode!
     //Spawners
     var topSpawn: SKSpriteNode!
     var rightSpawn: SKSpriteNode!
@@ -36,12 +37,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     //UI objects
     var ammoLabel: SKLabelNode!
     var waveLabel: SKLabelNode!
+    var restartScene: SKNode!
     //Initialize variables
     var fixedDelta: CFTimeInterval = 1.0/60.0 // 60 FPS
     var toBeDeleted: [SKSpriteNode] = [SKSpriteNode]()
     var contactTimer: CFTimeInterval = 0
     var spawnTimer: CFTimeInterval = 0
     var stagerTimer: UInt32 = 6
+    var turretsDisabled = true
     //Wave Controller
     var waveNum = 1
     var zombieCount = 0
@@ -53,7 +56,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var zombieZ = 0
     var fastBigZombies = 97
     var zombiePause: ZombieGameState = .wave
-    var normalZombies = 90 {
+    var normalZombies = 94 {
         didSet {
             fastBigZombies = 100 - ((100 - normalZombies) / 2)
         }
@@ -67,6 +70,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         bulletLayer = self.childNode(withName: "bulletLayer")!
         turretLayer = self.childNode(withName: "turretLayer")!
         zombieLayer = self.childNode(withName: "zombieLayer")!
+        baseLayer = self.childNode(withName: "baseLayer")!
+        restartScene = self.childNode(withName: "backgroundLayer")!
         
         //Connect the spawners
         topSpawn = self.childNode(withName: "topSpawn") as! SKSpriteNode
@@ -76,8 +81,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         //Connect the turrets
         topGun = self.childNode(withName: "//topGun") as! TopGun
+        topGun.isHidden = true
         leftGun = self.childNode(withName: "//leftGun") as! TopGun
+        leftGun.isHidden = true
         rightGun = self.childNode(withName: "//rightGun") as! TopGun
+        rightGun.isHidden = true
         
         //Connect the Emmiter Nodes
         topGunSmoke = self.childNode(withName: "topGunSmoke") as! SKEmitterNode
@@ -88,16 +96,66 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         waveLabel = self.childNode(withName: "waveLabel") as! SKLabelNode
         waveLabel.text = "Wave: \(waveNum)"
         
+        //Hide the bases for animation
+        for base in baseLayer.children as! [SKSpriteNode] {
+            base.isHidden = true
+        }
+        
         //Connect the turrets to the gameScene
         for turret in turretLayer.children as! [TopGun] {
             turret.gameScene = self
         }
+        
+        /* Slam Animation */
+        var delay = 0.0
+        //Play the animation
+        for turret in turretLayer.children as! [TopGun] {
+            turret.xScale = 1.5
+            turret.yScale = 1.5
+            let scaleDownX = SKAction.scaleX(to: 0.4, duration: 0.2)
+            let scaleDownY = SKAction.scaleY(to: 0.4, duration: 0.2)
+            let scaleDown = SKAction.run({
+                turret.isHidden = false
+                turret.run(scaleDownX)
+                turret.run(scaleDownY)
+            })
+            let wait = SKAction.wait(forDuration: delay)
+            let seq = SKAction.sequence([wait, scaleDown])
+            turret.run(seq)
+            delay += 0.5
+        }
+        
+        var baseDelay = 0.0
+        //Play the animation
+        for base in baseLayer.children as! [SKSpriteNode] {
+            base.xScale = 1.5
+            base.yScale = 1.5
+            let scaleDownX = SKAction.scaleX(to: 0.4, duration: 0.3)
+            let scaleDownY = SKAction.scaleY(to: 0.4, duration: 0.3)
+            let scaleDown = SKAction.run({
+                base.isHidden = false
+                base.run(scaleDownX)
+                base.run(scaleDownY)
+            })
+            let wait = SKAction.wait(forDuration: baseDelay)
+            let seq = SKAction.sequence([wait, scaleDown])
+            base.run(seq)
+            baseDelay += 0.5
+        }
+        
+        let wait = SKAction.wait(forDuration: 1.8)
+        let reenable = SKAction.run({
+            self.turretsDisabled = false
+        })
+        let seq = SKAction.sequence([wait, reenable])
+        self.run(seq)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch = touches.first!
         let location = touch.location(in: self)
         
+        if turretsDisabled == true { return }
         if turretLayer.children.count == 0 { return }
         //Creating an array to store our data
         var arrayDist: [(turret: Int, dist: CGFloat)] = []
@@ -236,8 +294,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
         
+        if turretsDisabled == true { return }
+        
+        //Call the restart scene only once
         if turretLayer.children.count == 0 {
             if zombiePause == .stop { return }
+            //Set the enum and from now on it will not be called again
             zombiePause = .stop
             if turretLayer.children.count == 0 {
                 stopAllZombies()
@@ -271,7 +333,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func stopAllZombies() {
-        zombiePause = .destroy
+        // Restart scene here
         //Should start deleting after restart sreen pops up
         var waitTime = 1.0
         for zombie in zombieLayer.children as! [Zombie] {
@@ -284,12 +346,59 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             run(seq)
             waitTime += 0.05
         }
-        let loadMenu = SKAction.run({ [unowned self] in
-            self.loadGame(fileName: "MainMenu")
-        })
-        let wait = SKAction.wait(forDuration: 3)
-        let seq = SKAction.sequence([wait, loadMenu])
-        self.run(seq)
+        
+        let moveTo = SKAction.move(to: CGPoint.zero, duration: 0.7)
+        restartScene.run(moveTo)
+        
+        /* Connect the buttons from the restart scene */
+        let restartButton = restartScene.childNode(withName: "restartButton") as! MSButtonNode
+        restartButton.selectedHandler = {
+            let moveMenu = SKAction.run({ [unowned self] in
+                self.moveRestartSceneOutOfScene()
+            })
+            let loadGame = SKAction.run({ [unowned self] in
+                self.loadGame(fileName: "GameScene")
+            })
+            let wait = SKAction.wait(forDuration: 1.0)
+            let seq = SKAction.sequence([moveMenu, wait, loadGame])
+            self.run(seq)
+        }
+        let mainMenuButton = restartScene.childNode(withName: "mainMenuButton") as! MSButtonNode
+        mainMenuButton.selectedHandler = {
+            let moveMenu = SKAction.run({ [unowned self] in
+                self.moveRestartSceneOutOfScene()
+            })
+            let loadMenu = SKAction.run({ [unowned self] in
+                self.loadGame(fileName: "MainMenu")
+            })
+            let wait = SKAction.wait(forDuration: 0.7)
+            let seq = SKAction.sequence([moveMenu, wait, loadMenu])
+            self.run(seq)
+        }
+        
+    }
+    
+    func moveRestartSceneOutOfScene() {
+        //Move the menu out of the scene
+        let moveTo = SKAction.move(to: CGPoint(x: 0, y: 520), duration: 0.5)
+        restartScene.run(moveTo)
+        //Remove all zombies
+        if zombieLayer.children.count >= 1 {
+            for zombie in zombieLayer.children {
+                zombie.removeFromParent()
+            }
+        }
+        //Disable buttons
+        let mainMenuButton = restartScene.childNode(withName: "mainMenuButton") as! MSButtonNode
+        let restartButton = restartScene.childNode(withName: "restartButton") as! MSButtonNode
+        let settingsButton = restartScene.childNode(withName: "settingsButton") as! MSButtonNode
+        mainMenuButton.isDisabled = true
+        restartButton.isDisabled = true
+        settingsButton.isDisabled = true
+    }
+    
+    func addRestartSceneConstraints() {
+        //Add constraints for the restart scene ui here
     }
     
     func waveManager() {

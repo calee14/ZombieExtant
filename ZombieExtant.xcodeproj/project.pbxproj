@@ -184,8 +184,10 @@
 		B38456691F26B41300D7E448 /* Base1.png in Resources */ = {isa = PBXBuildFile; fileRef = B38456671F26B41300D7E448 /* Base1.png */; };
 		B384566A1F26B41300D7E448 /* MG_Tier3.png in Resources */ = {isa = PBXBuildFile; fileRef = B38456681F26B41300D7E448 /* MG_Tier3.png */; };
 		B384566C1F26B68700D7E448 /* TopGun.swift in Sources */ = {isa = PBXBuildFile; fileRef = B384566B1F26B68700D7E448 /* TopGun.swift */; };
+		B39220FB1F39301C00526CAD /* left_arrow.png in Resources */ = {isa = PBXBuildFile; fileRef = B39220FA1F39301C00526CAD /* left_arrow.png */; };
 		B396CC361F27BC1400C1C11E /* Bullet1.png in Resources */ = {isa = PBXBuildFile; fileRef = B396CC351F27BC1400C1C11E /* Bullet1.png */; };
 		B396CC381F27BC2D00C1C11E /* Bullet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B396CC371F27BC2D00C1C11E /* Bullet.swift */; };
+		B3E3B0931F3A22D900D6CB12 /* DimboRegular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B39220F91F392BF100526CAD /* DimboRegular.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -368,6 +370,8 @@
 		B38456671F26B41300D7E448 /* Base1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Base1.png; sourceTree = "<group>"; };
 		B38456681F26B41300D7E448 /* MG_Tier3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MG_Tier3.png; sourceTree = "<group>"; };
 		B384566B1F26B68700D7E448 /* TopGun.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TopGun.swift; sourceTree = "<group>"; };
+		B39220F91F392BF100526CAD /* DimboRegular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = DimboRegular.ttf; sourceTree = "<group>"; };
+		B39220FA1F39301C00526CAD /* left_arrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = left_arrow.png; sourceTree = "<group>"; };
 		B396CC351F27BC1400C1C11E /* Bullet1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Bullet1.png; sourceTree = "<group>"; };
 		B396CC371F27BC2D00C1C11E /* Bullet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bullet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -386,6 +390,7 @@
 		B30467741F34FA81006B42BB /* UI-atlas */ = {
 			isa = PBXGroup;
 			children = (
+				B39220FA1F39301C00526CAD /* left_arrow.png */,
 				B30467851F34FC8E006B42BB /* panel_640_960.png */,
 				B30467871F34FC9F006B42BB /* panel_640_1136.png */,
 				B30467791F34FBBA006B42BB /* list_1.png */,
@@ -488,6 +493,7 @@
 				B32827811F243575005CA3B6 /* Assets.xcassets */,
 				B32827831F243575005CA3B6 /* LaunchScreen.storyboard */,
 				B32827861F243575005CA3B6 /* Info.plist */,
+				B39220F91F392BF100526CAD /* DimboRegular.ttf */,
 				B3237FD71F2BD99800EAC2E8 /* TurretActions.sks */,
 				B3661FB91F30F6F1007310E8 /* TurretExplosion.sks */,
 				B366207B1F3268C2007310E8 /* Smoking.sks */,
@@ -729,6 +735,7 @@
 				B304677A1F34FBBA006B42BB /* list_1.png in Resources */,
 				B352064D1F2BA37300BD2750 /* zombie10015.png in Resources */,
 				B36620841F33B1BA007310E8 /* MG_Tier32.png in Resources */,
+				B3E3B0931F3A22D900D6CB12 /* DimboRegular.ttf in Resources */,
 				B3565AEE1F27EAAA00F99520 /* zombie50001.png in Resources */,
 				B3661FE01F3141D9007310E8 /* zombie50015.png in Resources */,
 				B30467801F34FBEB006B42BB /* sound_off.png in Resources */,
@@ -860,6 +867,7 @@
 				B396CC361F27BC1400C1C11E /* Bullet1.png in Resources */,
 				B3237FD01F2BD7AD00EAC2E8 /* explosion4.png in Resources */,
 				B3661FDA1F3141D9007310E8 /* zombie50009.png in Resources */,
+				B39220FB1F39301C00526CAD /* left_arrow.png in Resources */,
 				B3661FE31F3141D9007310E8 /* zombie50018.png in Resources */,
 				B3661FED1F3141E6007310E8 /* zombie50032.png in Resources */,
 				B366204A1F3147AE007310E8 /* zombie30031.png in Resources */,

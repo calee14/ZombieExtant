@@ -73,7 +73,7 @@ class TopGun: SKSpriteNode {
             })
             
             let removeBase = SKAction.run({ [unowned self] in
-                let base = self.gameScene.childNode(withName: "\(self.name!)Base") as! SKSpriteNode
+                let base = self.gameScene.childNode(withName: "//\(self.name!)Base") as! SKSpriteNode
                 base.physicsBody = nil
             })
             

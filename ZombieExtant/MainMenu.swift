@@ -58,9 +58,9 @@ class MainMenu: SKScene {
                     //If the zombie is on the bottom half of the scene
                     if zombie.position.x < self.size.width / 2 {
                         //Bottom Left
-                        moveToPosition = CGPoint(x: -zombie.size.width, y: CGFloat(arc4random_uniform(UInt32(self.size.height / 2))))
+                        moveToPosition = CGPoint(x: CGFloat(arc4random_uniform(UInt32(self.size.width / 2))), y: -zombie.size.height)
                         print(moveToPosition)
-                        if zombie.position.x < self.size.width / 5 {
+                        if zombie.position.x < self.size.width / 6 {
                             //If it is closer to the left wall than bottom
                             moveToPosition = CGPoint(x: -zombie.size.width, y: CGFloat(arc4random_uniform(UInt32(self.size.height / 2))))
                         }
@@ -68,7 +68,7 @@ class MainMenu: SKScene {
                         //Bottom Right
                         moveToPosition = CGPoint(x: CGFloat(CGFloat(arc4random_uniform(UInt32(self.size.width / 2))) + (self.size.width / 2)) , y: -zombie.size.height)
                         print(moveToPosition)
-                        if zombie.position.x > self.size.width - self.size.width / 5 {
+                        if zombie.position.x > self.size.width - self.size.width / 6 {
                             //If it is closer to the right wall than bottom
                             moveToPosition = CGPoint(x: self.size.width + zombie.size.width, y: CGFloat(arc4random_uniform(UInt32(self.size.height / 2))))
                         }
@@ -79,7 +79,7 @@ class MainMenu: SKScene {
                         //Top Left
                         moveToPosition = CGPoint(x: CGFloat(arc4random_uniform(UInt32(self.size.width / 2))), y: self.size.height + zombie.size.height)
                         print(moveToPosition)
-                        if zombie.position.x < self.size.width / 5 {
+                        if zombie.position.x < self.size.width / 6 {
                             //If it is closer to the left then the top
                             moveToPosition = CGPoint(x: -zombie.size.width, y: CGFloat(arc4random_uniform(UInt32(self.size.height / 2))) + self.size.height / 2)
                         }
@@ -87,7 +87,7 @@ class MainMenu: SKScene {
                         //Top Right
                         moveToPosition = CGPoint(x: CGFloat(CGFloat(arc4random_uniform(UInt32(self.size.width / 2))) + (self.size.width / 2)) , y: self.size.height + zombie.size.height)
                         print(moveToPosition)
-                        if zombie.position.x > self.size.width - self.size.width / 5 {
+                        if zombie.position.x > self.size.width - self.size.width / 6 {
                             //If it is closer to the right then the top
                             moveToPosition = CGPoint(x: self.size.width + zombie.size.width, y: CGFloat(arc4random_uniform(UInt32(self.size.height / 2))) + self.size.height / 2)
                         }
@@ -96,7 +96,7 @@ class MainMenu: SKScene {
                 //Run the anitmation
                 self.animateZombie(newNode: zombie)
                 let moveTo = SKAction.move(to: moveToPosition, duration: TimeInterval(TimeInterval(arc4random_uniform(UInt32(0.5)) + 1)))
-                    zombie.run(moveTo, completion: {
+                zombie.run(moveTo, completion: {
                     zombie.removeFromParent()
                 })
             }
@@ -281,10 +281,11 @@ class MainMenu: SKScene {
         self.removeAllActions()
         //Animation for the walking zombie
         if newNode.position.x < self.size.width / 2 {
-            newNode.xScale = CGFloat(newNode.initialScale * -1)
-        } else if newNode.position.x < self.size.width / 2 {
-            newNode.xScale = self.xScale
+            newNode.xScale = newNode.xScale * -1
+        } else if newNode.position.x > self.size.width / 2 {
+            newNode.xScale = newNode.xScale
         }
+        print("new node \(newNode.xScale)")
         //let rand = Int(arc4random_uniform(4)) + 1
         let imageName = "zombie"
         var imageArray: [SKTexture] = [SKTexture]()
