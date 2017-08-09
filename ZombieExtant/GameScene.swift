@@ -38,6 +38,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var waveLabel: SKLabelNode!
     var restartScene: SKNode!
     var waveIndicator: SKLabelNode!
+    var pauseButton: MSButtonNode!
     //Initialize variables
     var fixedDelta: CFTimeInterval = 1.0/60.0 // 60 FPS
     var toBeDeleted: [SKSpriteNode] = [SKSpriteNode]()
@@ -46,6 +47,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var stagerTimer: UInt32 = 6
     var turretsDisabled = true
     var waveTitle = false
+    var pauseButtonImage = false
     //Wave Controller
     var waveNum = 1
     var zombieCount = 0
@@ -66,6 +68,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var highestWave = 0
     var highestZombieKilled = 0
     var restartArray: [SKNode] = [SKNode]()
+    
+    static var stayPaused = false as Bool
+    
+    override var isPaused: Bool {
+        get {
+            return super.isPaused
+        } set {
+            if newValue || !GameScene.stayPaused {
+                super.isPaused = newValue
+            }
+            GameScene.stayPaused = false
+        }
+    }
     
     override func didMove(to view: SKView) {
         //Set up scene here
@@ -105,6 +120,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         waveLabel = self.childNode(withName: "waveLabel") as! SKLabelNode
         waveLabel.isHidden = true
         waveLabel.text = "Wave: \(waveNum)"
+        //Pause Button
+        pauseButton = self.childNode(withName: "pauseButton") as! MSButtonNode
+        pauseButton.selectedHandler = { [unowned self] in
+            if self.pauseButtonImage == false {
+                self.pauseButton.texture = SKTexture(imageNamed: "play")
+                self.pauseButtonImage = true
+            } else if self.pauseButtonImage == true {
+                self.pauseButton.texture = SKTexture(imageNamed: "pause")
+                self.pauseButtonImage = false
+            }
+            self.isPaused = !self.isPaused
+        }
         
         //Hide the bases for animation
         for base in baseLayer.children as! [SKSpriteNode] {
@@ -162,6 +189,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        
+        if self.isPaused == true { return }
+        
         let touch = touches.first!
         let location = touch.location(in: self)
         
@@ -379,22 +409,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let userDefaults = UserDefaults.standard
         let savedHighWave = userDefaults.integer(forKey: "highWave")
         //Check if new highscore for wavesNum
-        if waveNum > highestWave {
+        //if waveNum > highestWave {
             highestWave = waveNum
-        }
+        //}
         //Check if new highscore for wavesNum
         if highestWave > savedHighWave {
-            new2.isHidden = true
+            new2.isHidden = false
             userDefaults.set(highestWave, forKey: "highWave")
         }
         let savedZombiesKilled = userDefaults.integer(forKey: "highDestroyed")
         //Check if new highscore for zombiesKilled
-        if zombieKilled > highestZombieKilled {
+        //if zombieKilled > highestZombieKilled {
             highestZombieKilled = zombieKilled
-        }
+        //}
         //Check if new highscore for zombiesKilled
         if highestZombieKilled > savedZombiesKilled {
-            new1.isHidden = true
+            new1.isHidden = false
             userDefaults.set(zombieKilled, forKey: "highDestroyed")
         }
         /*Set up the labels */

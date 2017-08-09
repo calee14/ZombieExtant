@@ -309,7 +309,12 @@ class Zombie: SKSpriteNode {
             break
         case .big:
             //Set the image
-            zombieImage = 4
+            let rand = arc4random_uniform(100)
+            if rand < 25 {
+                zombieImage = 4
+            } else if rand < 100 {
+                zombieImage = 3
+            }
             //size of the big zombie
             self.xScale = 0.16
             self.yScale = 0.16
