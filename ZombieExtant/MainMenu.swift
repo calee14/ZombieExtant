@@ -16,20 +16,25 @@ class MainMenu: SKScene {
     var zombieLayer: SKNode!
     var zombieZ = 6
     var spawnZombies = true
-    
     /* Ui */
     var playButton: MSButtonNode!
     var title: SKNode!
+    var settingsButton: MSButtonNode!
     
     override func didMove(to view: SKView) {
         //Set up scene here
         zombieLayer = self.childNode(withName: "zombieLayer")!
         
+        //Connect the UI
         title = self.childNode(withName: "title")!
-        
+        settingsButton = self.childNode(withName: "settingsButton") as! MSButtonNode
         playButton = self.childNode(withName: "playButton") as! MSButtonNode
         playButton.selectedHandler = { [unowned self] in
             /* Play Button Handler*/
+            
+            //Move the settings button out of the scene
+            let moveSettings = SKAction.move(to: CGPoint(x: self.size.width + self.settingsButton.size.width ,y: self.settingsButton.position.y), duration: 1.0)
+            self.settingsButton.run(moveSettings)
             
             //Move the title out of the screen
             let moveTitle = SKAction.move(to: CGPoint(x: self.title.position.x, y: self.size.height + 100) , duration: 1.0)

@@ -118,7 +118,7 @@ class TopGun: SKSpriteNode {
         
         //Adding the bullet to the scene
         let bullet = Bullet()
-        bullet.zPosition = 10000
+        bullet.zPosition = 101
         gameScene.bulletLayer.addChild(bullet)
         //gameScene.addChild(bullet)
         
@@ -149,6 +149,6 @@ class TopGun: SKSpriteNode {
         super.init(coder: aDecoder)
         
         connectExplosion()
-        self.zPosition = 10000
+        self.zPosition = 101
     }
 }

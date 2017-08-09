@@ -331,7 +331,7 @@ class Zombie: SKSpriteNode {
         self.name = "zombie"
         self.texture = SKTexture(imageNamed: "zombie50001")
         self.size = (self.texture?.size())!
-        self.zPosition = 5
+        //self.zPosition = 5
         self.xScale = 0.13
         self.yScale = 0.13
         self.physicsBody = SKPhysicsBody(rectangleOf: self.size)

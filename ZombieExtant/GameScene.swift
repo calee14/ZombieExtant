@@ -35,9 +35,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var leftGunSmoke: SKEmitterNode!
     var rightGunSmoke: SKEmitterNode!
     //UI objects
-    var ammoLabel: SKLabelNode!
     var waveLabel: SKLabelNode!
     var restartScene: SKNode!
+    var waveIndicator: SKLabelNode!
     //Initialize variables
     var fixedDelta: CFTimeInterval = 1.0/60.0 // 60 FPS
     var toBeDeleted: [SKSpriteNode] = [SKSpriteNode]()
@@ -45,6 +45,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var spawnTimer: CFTimeInterval = 0
     var stagerTimer: UInt32 = 6
     var turretsDisabled = true
+    var waveTitle = false
     //Wave Controller
     var waveNum = 1
     var zombieCount = 0
@@ -53,7 +54,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var waveBegan = false
     var filterZombiesPerWave = 18
     var zombiesInTheWave = 0
-    var zombieZ = 0
+    var zombieZ = 5 //Start Z position
     var fastBigZombies = 97
     var zombiePause: ZombieGameState = .wave
     var normalZombies = 94 {
@@ -61,6 +62,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             fastBigZombies = 100 - ((100 - normalZombies) / 2)
         }
     }
+    var zombieKilled = 0
+    var highestWave = 0
+    var highestZombieKilled = 0
+    var restartArray: [SKNode] = [SKNode]()
+    
     override func didMove(to view: SKView) {
         //Set up scene here
         
@@ -72,6 +78,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         zombieLayer = self.childNode(withName: "zombieLayer")!
         baseLayer = self.childNode(withName: "baseLayer")!
         restartScene = self.childNode(withName: "backgroundLayer")!
+        restartArray.append(restartScene)
+        restartScene.removeFromParent()
         
         //Connect the spawners
         topSpawn = self.childNode(withName: "topSpawn") as! SKSpriteNode
@@ -93,7 +101,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         rightGunSmoke = self.childNode(withName: "rightGunSmoke") as! SKEmitterNode
         
         //Connect the UI objects
+        waveIndicator = self.childNode(withName: "waveIndicator") as! SKLabelNode
         waveLabel = self.childNode(withName: "waveLabel") as! SKLabelNode
+        waveLabel.isHidden = true
         waveLabel.text = "Wave: \(waveNum)"
         
         //Hide the bases for animation
@@ -154,6 +164,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch = touches.first!
         let location = touch.location(in: self)
+        
+        //remove the title when the player taps
+        if waveTitle == true {
+            waveLabel.removeAllActions()
+            waveLabel.isHidden = true
+        }
         
         if turretsDisabled == true { return }
         if turretLayer.children.count == 0 { return }
@@ -253,6 +269,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     //Update zombie count
                     zombieCount -= 1
                     zombieOnGroundCount -= 1
+                    zombieKilled += 1
                 } else {
                     zombie.health -= 1
                     zombie.takeHitAnimation()
@@ -333,7 +350,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func stopAllZombies() {
-        // Restart scene here
+        //MARK: Practically Restart scene
         //Should start deleting after restart sreen pops up
         var waitTime = 1.0
         for zombie in zombieLayer.children as! [Zombie] {
@@ -347,12 +364,59 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             waitTime += 0.05
         }
         
+        //Add the restart before we do the check on it
+        for restart in restartArray {
+            self.addChild(restart)
+        }
+        
+        //Hide the new icons
+        let new1 = restartScene.childNode(withName: "new1") as! SKSpriteNode
+        let new2 = restartScene.childNode(withName: "new2") as! SKSpriteNode
+        new1.isHidden = true
+        new2.isHidden = true
+        
+        /* Set up user Default */
+        let userDefaults = UserDefaults.standard
+        let savedHighWave = userDefaults.integer(forKey: "highWave")
+        //Check if new highscore for wavesNum
+        if waveNum > highestWave {
+            highestWave = waveNum
+        }
+        //Check if new highscore for wavesNum
+        if highestWave > savedHighWave {
+            new2.isHidden = true
+            userDefaults.set(highestWave, forKey: "highWave")
+        }
+        let savedZombiesKilled = userDefaults.integer(forKey: "highDestroyed")
+        //Check if new highscore for zombiesKilled
+        if zombieKilled > highestZombieKilled {
+            highestZombieKilled = zombieKilled
+        }
+        //Check if new highscore for zombiesKilled
+        if highestZombieKilled > savedZombiesKilled {
+            new1.isHidden = true
+            userDefaults.set(zombieKilled, forKey: "highDestroyed")
+        }
+        /*Set up the labels */
+        let waveLabel = restartScene.childNode(withName: "waveLabel") as! SKLabelNode
+        let zombiesKilledLabel = restartScene.childNode(withName: "zombiesKilledLabel") as! SKLabelNode
+        let highWaveLabel = restartScene.childNode(withName: "highWaveLabel") as! SKLabelNode
+        let highZombieKilledLabel = restartScene.childNode(withName: "highzombiesKilledLabel") as! SKLabelNode
+        waveLabel.text = "Wave: \(waveNum)"
+        zombiesKilledLabel.text = "Zombies Killed: \(zombieKilled)"
+        highWaveLabel.text = "Highest Wave: \(userDefaults.integer(forKey: "highWave"))"
+        highZombieKilledLabel.text = "Highest Zombie Killed: \(userDefaults.integer(forKey: "highDestroyed"))"
+        
+        //Move the restartScene into view
+        restartScene.isHidden = false
         let moveTo = SKAction.move(to: CGPoint.zero, duration: 0.7)
         restartScene.run(moveTo)
         
         /* Connect the buttons from the restart scene */
+        //RestartButton takes us to the gameScene
         let restartButton = restartScene.childNode(withName: "restartButton") as! MSButtonNode
-        restartButton.selectedHandler = {
+        restartButton.selectedHandler = { [unowned self] in
+            //self.restartArray = [SKNode]()
             let moveMenu = SKAction.run({ [unowned self] in
                 self.moveRestartSceneOutOfScene()
             })
@@ -363,8 +427,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             let seq = SKAction.sequence([moveMenu, wait, loadGame])
             self.run(seq)
         }
+        //MainMenu Button takes us to the mainMenu
         let mainMenuButton = restartScene.childNode(withName: "mainMenuButton") as! MSButtonNode
-        mainMenuButton.selectedHandler = {
+        mainMenuButton.selectedHandler = { [unowned self] in
             let moveMenu = SKAction.run({ [unowned self] in
                 self.moveRestartSceneOutOfScene()
             })
@@ -402,8 +467,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func waveManager() {
+        //Manages the wave
+        //MARK: Wave Manager
+        print("wave Label \(waveLabel.fontSize)")
         if waveBegan == false {
             
+            let wait = SKAction.wait(forDuration: 0.5)
+            waveLabel.isHidden = false
+            let hide = SKAction.fadeAlpha(by: -1, duration: 3.0)
+            let setTitle = SKAction.run({ [unowned self] in
+                self.waveTitle = true
+                self.waveIndicator.text = "Wave: \(self.waveNum)"
+            })
+            let seq = SKAction.sequence([wait, setTitle, hide])
+            waveLabel.run(seq)
             //Gets the value of the num of zombies in the wave
             //Important for spawning the entire wave
             zombieCount = waveNum * filterZombiesPerWave
@@ -413,6 +490,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 //Number of spawns editor
                 zombieCount = waveNum * 24
                 zombiesInTheWave = waveNum * 24
+                if waveNum == 3 {
+                    zombieCount = 2 * 24
+                    zombiesInTheWave = 2 * 24
+                }
             } else if waveNum >= 6 {
                 //96 is four 24 * num of spawners which is 4
                 //4 is for every level after 5
@@ -426,7 +507,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     zombiesInTheWave = (11 - 4) * filterZombiesPerWave * 4 // 96
                 }
             }
-            zombieZ = zombiesInTheWave + 6
+            //zombieZ = zombiesInTheWave + 6
             waveBegan = true
         }
         
@@ -452,7 +533,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             //Start a new wave
             waveNum += 1
             waveLabel.text = "Wave: \(waveNum)"
+            waveIndicator.text = "Wave: \(waveNum)"
             spawnWave(wave: waveNum)
+            //Reset the label
+            waveLabel.isHidden = true
+            waveLabel.alpha = 1
+            let backFont = waveLabel.childNode(withName: "label") as! SKLabelNode
+            backFont.text = "Wave: \(waveNum)"
             print("wave count = \(waveNum)")
             //update our filter zombies
             //896
@@ -483,8 +570,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func spawnWave(wave: Int) {
-        //Get the total num zombies for the wave
+        //MARK: Spawns The Wave
+        //Spawns the wave at a persistent pace
         
+        //Get the total num zombies for the wave
         if waveBegan == false {
             return
         }
@@ -544,12 +633,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 let randY = -1 * (CGFloat(arc4random_uniform(UInt32(spawner.position.y + spawner.size.height)))) - CGFloat(distanceCounter)
                 randPosition = CGPoint(x: randX, y: randY)
             }
+            //Fix the zombieZ position
+            if zombieZ >= 105 {
+                zombieZ = 5
+            }
+            zombieZ += 1
+            
             //Creates a number of zombies
             //Add a zombie to the scene
             let newZombie = Zombie()
             newZombie.gameScene = self
             newZombie.zPosition = CGFloat(zombieZ)
-            zombieZ -= 1
+            //zombieZ -= 1
             
             //Level editor
             if waveNum == 1 {
@@ -580,7 +675,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             let seq = SKAction.sequence([wait, addZombie])
             self.run(seq)
         }
-        //}
     }
     
     func distanceTo(_ dist1: CGPoint, _ dist2: CGPoint) -> CGFloat {
