@@ -20,11 +20,15 @@ class TopGun: SKSpriteNode {
     var image = 1
     
     func turnGun(destPoint: CGPoint) {
-        
         //turns the gun
-        let adjust = Double.pi/2.0
+        let adjust = Double.pi / 2.0
         let v1 = CGVector(dx:0, dy:1)
-        let v2 = CGVector(dx:destPoint.x - position.x, dy: destPoint.y - position.y)
+        var iPadAdjustMent = 0.0
+        //If the device is an ipad
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            iPadAdjustMent = 53.390625
+        }
+        let v2 = CGVector(dx:destPoint.x - position.x, dy: destPoint.y - position.y - CGFloat(iPadAdjustMent))
         let angle = atan2(v2.dy, v2.dx) - atan2(v1.dy, v1.dx)
         zRotation = angle - CGFloat(adjust)
     }

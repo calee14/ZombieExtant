@@ -33,6 +33,8 @@
 		B30467A71F38E04F006B42BB /* V.png in Resources */ = {isa = PBXBuildFile; fileRef = B30467981F38E04E006B42BB /* V.png */; };
 		B30467A81F38E04F006B42BB /* W.png in Resources */ = {isa = PBXBuildFile; fileRef = B30467991F38E04E006B42BB /* W.png */; };
 		B30467A91F38E04F006B42BB /* Z.png in Resources */ = {isa = PBXBuildFile; fileRef = B304679A1F38E04E006B42BB /* Z.png */; };
+		B31CEFD91F3BB849002F74D1 /* CapBuilding2.png in Resources */ = {isa = PBXBuildFile; fileRef = B31CEFD81F3BB849002F74D1 /* CapBuilding2.png */; };
+		B31CEFDB1F3BC9A4002F74D1 /* ipadBackground.png in Resources */ = {isa = PBXBuildFile; fileRef = B31CEFDA1F3BC9A4002F74D1 /* ipadBackground.png */; };
 		B32343481F3BA4E9009CE8E2 /* new.png in Resources */ = {isa = PBXBuildFile; fileRef = B32343471F3BA4E9009CE8E2 /* new.png */; };
 		B3237FBF1F2BB97900EAC2E8 /* zombie10020.png in Resources */ = {isa = PBXBuildFile; fileRef = B3237FBE1F2BB97900EAC2E8 /* zombie10020.png */; };
 		B3237FC41F2BB98F00EAC2E8 /* zombie10029.png in Resources */ = {isa = PBXBuildFile; fileRef = B3237FC01F2BB98F00EAC2E8 /* zombie10029.png */; };
@@ -218,6 +220,8 @@
 		B30467981F38E04E006B42BB /* V.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = V.png; sourceTree = "<group>"; };
 		B30467991F38E04E006B42BB /* W.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = W.png; sourceTree = "<group>"; };
 		B304679A1F38E04E006B42BB /* Z.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Z.png; sourceTree = "<group>"; };
+		B31CEFD81F3BB849002F74D1 /* CapBuilding2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CapBuilding2.png; sourceTree = "<group>"; };
+		B31CEFDA1F3BC9A4002F74D1 /* ipadBackground.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ipadBackground.png; sourceTree = "<group>"; };
 		B32343471F3BA4E9009CE8E2 /* new.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = new.png; sourceTree = "<group>"; };
 		B3237FBE1F2BB97900EAC2E8 /* zombie10020.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = zombie10020.png; sourceTree = "<group>"; };
 		B3237FC01F2BB98F00EAC2E8 /* zombie10029.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = zombie10029.png; sourceTree = "<group>"; };
@@ -646,6 +650,8 @@
 		B38456661F26B41300D7E448 /* zombie-atlas */ = {
 			isa = PBXGroup;
 			children = (
+				B31CEFD81F3BB849002F74D1 /* CapBuilding2.png */,
+				B31CEFDA1F3BC9A4002F74D1 /* ipadBackground.png */,
 				B304678B1F38E04E006B42BB /* Characters */,
 				B30467741F34FA81006B42BB /* UI-atlas */,
 				B356F6461F2FA98200F2FDCA /* explosion */,
@@ -796,10 +802,12 @@
 				B366203F1F31479B007310E8 /* zombie30016.png in Resources */,
 				B36620701F3147DA007310E8 /* zombie20018.png in Resources */,
 				B3237FD81F2BD99800EAC2E8 /* TurretActions.sks in Resources */,
+				B31CEFD91F3BB849002F74D1 /* CapBuilding2.png in Resources */,
 				B36620121F31422A007310E8 /* zombie40018.png in Resources */,
 				B3311FC61F2BAA790056CB40 /* shade2.png in Resources */,
 				B3661FD81F3141D9007310E8 /* zombie50007.png in Resources */,
 				B352063B1F2B9DBE00BD2750 /* zombie10004.png in Resources */,
+				B31CEFDB1F3BC9A4002F74D1 /* ipadBackground.png in Resources */,
 				B36620351F31479B007310E8 /* zombie30006.png in Resources */,
 				B36620631F3147DA007310E8 /* zombie20005.png in Resources */,
 				B30467A81F38E04F006B42BB /* W.png in Resources */,
@@ -1045,6 +1053,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = 6E9XW5U7WR;
 				INFOPLIST_FILE = ZombieExtant/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cap.ZombieExtant;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1059,6 +1068,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = 6E9XW5U7WR;
 				INFOPLIST_FILE = ZombieExtant/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cap.ZombieExtant;
 				PRODUCT_NAME = "$(TARGET_NAME)";

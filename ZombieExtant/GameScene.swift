@@ -68,7 +68,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var highestWave = 0
     var highestZombieKilled = 0
     var restartArray: [SKNode] = [SKNode]()
-    
+    var backgroundImage: SKSpriteNode!
     static var stayPaused = false as Bool
     
     override var isPaused: Bool {
@@ -87,6 +87,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         physicsWorld.contactDelegate = self
         
+        backgroundImage = self.childNode(withName: "background") as! SKSpriteNode
+        
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            self.size.height += 53.390625 * 2
+            for node in self.children {
+                if node.name == "background" { continue }
+                node.position.y += 53.390625
+            }
+            
+            backgroundImage.texture = SKTexture(imageNamed: "ipadBackground")
+            backgroundImage.size = (backgroundImage.texture?.size())!
+            backgroundImage.position = CGPoint.zero
+        }
+        
         //Connect the game objects
         bulletLayer = self.childNode(withName: "bulletLayer")!
         turretLayer = self.childNode(withName: "turretLayer")!
@@ -94,7 +108,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         baseLayer = self.childNode(withName: "baseLayer")!
         restartScene = self.childNode(withName: "backgroundLayer")!
         restartArray.append(restartScene)
-        restartScene.removeFromParent()
         
         //Connect the spawners
         topSpawn = self.childNode(withName: "topSpawn") as! SKSpriteNode
@@ -186,6 +199,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         })
         let seq = SKAction.sequence([wait, reenable])
         self.run(seq)
+        
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            addContraints()
+            restartScene.removeFromParent()
+        }
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -234,7 +252,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         //Turns the turret
         let turretChildren = turretLayer.children as! [TopGun]
         if turretChildren[minimum].health <= 0 { return }
-        turretChildren[minimum].turnGun(destPoint: location)
+        let newLocation = convert(location, to: self)
+        turretChildren[minimum].turnGun(destPoint: newLocation)
         turretChildren[minimum].fireBullet()
         print(minimum)
         
@@ -399,6 +418,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             self.addChild(restart)
         }
         
+        //Stop the pause Button
+        pauseButton.isDisabled = true
+        
         //Hide the new icons
         let new1 = restartScene.childNode(withName: "new1") as! SKSpriteNode
         let new2 = restartScene.childNode(withName: "new2") as! SKSpriteNode
@@ -473,6 +495,52 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
     }
     
+    func addContraints() {
+        //MARK: Add contraints to the UI
+        
+        //Pause Button
+        pauseButton.position.x = self.size.width - 20
+        pauseButton.position.y = self.size.height - 20
+        
+        //Wave Indicator
+        waveIndicator.position.x = 50
+        waveIndicator.position.y = self.size.height - 40
+        
+        //Settings Button
+        let settingsButton = restartScene.childNode(withName: "settingsButton") as! MSButtonNode
+        settingsButton.position.x = 50
+        settingsButton.position.y = self.size.height - 50
+        
+        //Faded background
+        let fadedBackground = restartScene.childNode(withName: "backgroundFade") as! SKSpriteNode
+        fadedBackground.size = self.size
+        fadedBackground.position = CGPoint.zero
+        
+        //Text
+        //Score Label
+        let scoreLabel = restartScene.childNode(withName: "scoreLabel") as! SKLabelNode
+        scoreLabel.position.y = self.size.height - 70
+        //Wave Count
+        let waveLabel = restartScene.childNode(withName: "waveLabel") as! SKLabelNode
+        waveLabel.position.y = self.size.height / 2 + 50
+        //Zombies Killed
+        let zombiesKilledLabel = restartScene.childNode(withName: "zombiesKilledLabel") as! SKLabelNode
+        zombiesKilledLabel.position.y = waveLabel.position.y - 30
+        //Highest Wave Count
+        let highWaveLabel = restartScene.childNode(withName: "highWaveLabel") as! SKLabelNode
+        highWaveLabel.position.y = self.size.height / 2 - 40
+        //Highest Zombies Killed
+        let highZombieKilledLabel = restartScene.childNode(withName: "highzombiesKilledLabel") as! SKLabelNode
+        highZombieKilledLabel.position.y = highWaveLabel.position.y - 30
+        //New Icons
+        let new1 = restartScene.childNode(withName: "new1") as! SKSpriteNode
+        let new2 = restartScene.childNode(withName: "new2") as! SKSpriteNode
+        new1.position.y = highZombieKilledLabel.position.y + 10
+        new1.position.x = highZombieKilledLabel.position.x - new1.size.width / 2
+        new2.position.y = highWaveLabel.position.y + 10
+        new2.position.x = highWaveLabel.position.x - new2.size.width / 2
+        
+    }
     func moveRestartSceneOutOfScene() {
         //Move the menu out of the scene
         let moveTo = SKAction.move(to: CGPoint(x: 0, y: 520), duration: 0.5)

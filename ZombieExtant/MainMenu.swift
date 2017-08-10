@@ -20,9 +20,22 @@ class MainMenu: SKScene {
     var playButton: MSButtonNode!
     var title: SKNode!
     var settingsButton: MSButtonNode!
+    var backgroundImage: SKSpriteNode!
     
     override func didMove(to view: SKView) {
         //Set up scene here
+        
+        backgroundImage = self.childNode(withName: "background") as! SKSpriteNode
+        
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            self.size.height += 53.390625 * 2
+            
+            backgroundImage.texture = SKTexture(imageNamed: "ipadBackground")
+            backgroundImage.size = (backgroundImage.texture?.size())!
+            backgroundImage.position = CGPoint.zero
+        }
+
+        
         zombieLayer = self.childNode(withName: "zombieLayer")!
         
         //Connect the UI
@@ -114,8 +127,19 @@ class MainMenu: SKScene {
             self.run(seq)
         }
         
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            addContraints()
+        }
         //Start to spawn the zombies
         spawnZombies(num: 7)
+    }
+    
+    func addContraints() {
+        //Title Contraints
+        title.position.y = 50
+        
+        //Setting Button Contraints
+        settingsButton.position.y = self.size.height - 20
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -182,7 +206,7 @@ class MainMenu: SKScene {
             
             newZombie.zPosition = CGFloat(zombieZ)
             zombieZ += 1
-            if zombieZ >= 200 {
+            if zombieZ >= 100 {
                 zombieZ = 6
             }
             //random movement
