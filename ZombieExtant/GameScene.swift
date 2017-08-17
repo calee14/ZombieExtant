@@ -200,6 +200,31 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let seq = SKAction.sequence([wait, reenable])
         self.run(seq)
         
+        /* Play Base Slam*/
+        //Start the Drop music
+        let baseDropSound = SKAudioNode.init(fileNamed: "BaseDrop")
+        let adjustVolume = SKAction.changeVolume(to: 1.0, duration: 0.0)
+        let playAudio = SKAction.play()
+        baseDropSound.autoplayLooped = false
+        baseDropSound.name = "baseDrop"
+        //Add it to the scene and play it
+        self.addChild(baseDropSound)
+        baseDropSound.run(adjustVolume)
+        baseDropSound.run(playAudio)
+        
+        /* Play the Backgroud Music */
+        //Start the background music
+        let backgroundSound = SKAudioNode.init(fileNamed: "backgroundMisc")
+        let adjustBackgroundVolume = SKAction.changeVolume(to: 1.0, duration: 0.0)
+        let playBackgroundAudio = SKAction.play()
+        backgroundSound.autoplayLooped = true
+        backgroundSound.name = "backgroundMusic"
+        //Add it to the scene and play it
+        self.addChild(backgroundSound)
+        backgroundSound.run(adjustBackgroundVolume)
+        backgroundSound.run(playBackgroundAudio)
+        
+        //Set up the restart Scene
         if UIDevice.current.userInterfaceIdiom == .pad {
             addContraints()
             restartScene.removeFromParent()
@@ -468,6 +493,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         //RestartButton takes us to the gameScene
         let restartButton = restartScene.childNode(withName: "restartButton") as! MSButtonNode
         restartButton.selectedHandler = { [unowned self] in
+            //Remove the sound
+            let backgroundSound = self.childNode(withName: "backgroundMusic") as! SKAudioNode
+            backgroundSound.isPaused = true
+            backgroundSound.removeFromParent()
+            //Disable all buttons
+            for node in self.restartScene.children {
+                if node is MSButtonNode {
+                    let button = node as! MSButtonNode
+                    button.isDisabled = true
+                    //print("Button is disabled = \(button.isDisabled)")
+                }
+            }
             //self.restartArray = [SKNode]()
             let moveMenu = SKAction.run({ [unowned self] in
                 self.moveRestartSceneOutOfScene()
@@ -482,6 +519,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         //MainMenu Button takes us to the mainMenu
         let mainMenuButton = restartScene.childNode(withName: "mainMenuButton") as! MSButtonNode
         mainMenuButton.selectedHandler = { [unowned self] in
+            //Remove the sound
+            let backgroundSound = self.childNode(withName: "backgroundMusic") as! SKAudioNode
+            backgroundSound.isPaused = true
+            backgroundSound.removeFromParent()
+            
+            for node in self.restartScene.children {
+                if node is MSButtonNode {
+                    let button = node as! MSButtonNode
+                    button.isDisabled = true
+                    //print("Button is disabled = \(button.isDisabled)")
+                }
+            }
             let moveMenu = SKAction.run({ [unowned self] in
                 self.moveRestartSceneOutOfScene()
             })

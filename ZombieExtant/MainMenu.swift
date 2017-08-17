@@ -16,6 +16,7 @@ class MainMenu: SKScene {
     var zombieLayer: SKNode!
     var zombieZ = 6
     var spawnZombies = true
+    var soundTimer: CFTimeInterval = 0
     /* Ui */
     var playButton: MSButtonNode!
     var title: SKNode!
@@ -44,6 +45,11 @@ class MainMenu: SKScene {
         playButton = self.childNode(withName: "playButton") as! MSButtonNode
         playButton.selectedHandler = { [unowned self] in
             /* Play Button Handler*/
+            
+            //Remove the sound 
+            let backgroundSound = self.childNode(withName: "backgroundMusic") as! SKAudioNode
+            backgroundSound.isPaused = true
+            backgroundSound.removeFromParent()
             
             //Move the settings button out of the scene
             let moveSettings = SKAction.move(to: CGPoint(x: self.size.width + self.settingsButton.size.width ,y: self.settingsButton.position.y), duration: 1.0)
@@ -132,6 +138,19 @@ class MainMenu: SKScene {
         }
         //Start to spawn the zombies
         spawnZombies(num: 7)
+        
+        /* Play the Backgroud Music */
+        //Start the background music
+        let backgroundSound = SKAudioNode.init(fileNamed: "backgroundMisc")
+        let adjustBackgroundVolume = SKAction.changeVolume(to: 1.0, duration: 0.0)
+        let playBackgroundAudio = SKAction.play()
+        backgroundSound.autoplayLooped = false
+        backgroundSound.name = "backgroundMusic"
+        //Add it to the scene and play it
+        self.addChild(backgroundSound)
+        backgroundSound.run(adjustBackgroundVolume)
+        backgroundSound.run(playBackgroundAudio)
+        
     }
     
     func addContraints() {
@@ -170,6 +189,31 @@ class MainMenu: SKScene {
             timer = 0
         }
         
+        if soundTimer > 4 {
+            /* Play Zombie Sound Sound*/
+            //Start the zombie sound
+            let rand = arc4random_uniform(100)
+            var zombieTypeOfSound = ""
+            if rand < 50 {
+                zombieTypeOfSound = "01"
+            } else if rand < 100 {
+                zombieTypeOfSound = "04"
+            }
+            let zombieSound = SKAudioNode.init(fileNamed: "little_robot_sound_factory_Zombie_\(zombieTypeOfSound)")
+            let adjustVolume = SKAction.changeVolume(to: 1.0, duration: 0.0)
+            let playAudio = SKAction.play()
+            zombieSound.autoplayLooped = false
+            zombieSound.name = "groan"
+            //Add it to the scene and play it
+            self.addChild(zombieSound)
+            zombieSound.run(adjustVolume)
+            zombieSound.run(playAudio)
+            
+            soundTimer = 0
+        }
+        
+        //Update the timer
+        soundTimer += fixedDelta
         timer += fixedDelta
     }
     
